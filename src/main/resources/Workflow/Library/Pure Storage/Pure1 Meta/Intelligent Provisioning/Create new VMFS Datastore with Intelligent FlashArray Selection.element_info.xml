@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">Library.Pure Storage.Pure1 Meta.Intelligent Provisioning</entry>
+<entry key="categoryPathEscaped">TGlicmFyeQ==.UHVyZSBTdG9yYWdl.UHVyZTEgTWV0YQ==.SW50ZWxsaWdlbnQgUHJvdmlzaW9uaW5n</entry>
+<entry key="name">Create new VMFS Datastore with Intelligent FlashArray Selection</entry>
+<entry key="type">Workflow</entry>
+<entry key="id">9ebcc117-b854-41ce-9b7c-b22f65dbaeb8</entry>
+</properties>

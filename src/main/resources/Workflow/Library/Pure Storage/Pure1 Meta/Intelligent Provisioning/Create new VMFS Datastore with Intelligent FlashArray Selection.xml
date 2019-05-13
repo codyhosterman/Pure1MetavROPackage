@@ -1,0 +1,694 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item18" object-name="workflow:name=generic" id="9ebcc117-b854-41ce-9b7c-b22f65dbaeb8" version="3.0.0" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Create new VMFS Datastore with Intelligent FlashArray Selection]]></display-name>
+  <description><![CDATA[Automatically selects optimal FlashArray from Pure, creates new volume, presents to correct host group and formats with latest supported version of VMFS]]></description>
+  <error-handler name="item12" throw-bind-name="errorCode">
+    <position y="309.0454545454545" x="164.5"></position>
+  </error-handler>
+  <ref-types><![CDATA[(VC:ClusterComputeResource)]]></ref-types>
+  <position y="50.0" x="100.0"></position>
+  <input>
+    <param name="clusterName" type="VC:ClusterComputeResource">
+      <description><![CDATA[vCenter cluster to provision to]]></description>
+    </param>
+    <param name="volName" type="string">
+      <description><![CDATA[Volume Name]]></description>
+    </param>
+    <param name="volSize" type="number">
+      <description><![CDATA[Volume Size]]></description>
+    </param>
+    <param name="volUnit" type="string">
+      <description><![CDATA[Unit]]></description>
+    </param>
+    <param name="analysisPeriod" type="string"></param>
+    <param name="aggregation" type="string"></param>
+    <param name="advancedOptions" type="boolean"></param>
+    <param name="capacityThreshold" type="number"></param>
+    <param name="finalCapacityThreshold" type="number"></param>
+  </input>
+  <output>
+    <param name="datastore" type="VC:Datastore">
+      <description><![CDATA[The new datastore]]></description>
+    </param>
+    <param name="faVolumeCreated" type="PS:Volume">
+      <description><![CDATA[FlashArray Volume created for datastore]]></description>
+    </param>
+  </output>
+  <attrib name="hosts" type="Array/VC:HostSystem" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+    <description><![CDATA[ESXi hosts]]></description>
+  </attrib>
+  <attrib name="result" type="Array/PS:Host" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+    <description><![CDATA[List of flasharray hosts]]></description>
+  </attrib>
+  <attrib name="hostResults" type="Array/string" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+    <description><![CDATA[Host Results]]></description>
+  </attrib>
+  <attrib name="flashArrayHosts" type="Array/PS:Host" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="hgroupName" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+    <description><![CDATA[HostGroup Name]]></description>
+  </attrib>
+  <attrib name="errorCode" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="diskName" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="vmfsHost" type="VC:HostSystem" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="actionResult" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="eradicate" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+  </attrib>
+  <attrib name="isVolumeCreated" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="volume" type="PS:Volume" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+    <description><![CDATA[Volume to disconnect and destroy]]></description>
+  </attrib>
+  <attrib name="isVolumeConnected" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+  </attrib>
+  <attrib name="hostGroupObj" type="PS:HostGroup" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="flashArrayConnection" type="PS:FlashArrayConnection" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+    <description><![CDATA[FlashArray Connection]]></description>
+  </attrib>
+  <attrib name="flashArrays" type="Array/PS:FlashArrayConnection" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <workflow-note x="100.0" y="281.81818181818176" w="844.0" h="84.0">
+    <description><![CDATA[Rollback if Volume created]]></description>
+  </workflow-note>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="209.04545454545453" x="524.5"></position>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item2" type="task">
+    <display-name><![CDATA[Get ESXi hosts from cluster]]></display-name>
+    <script encoded="false"><![CDATA[hosts = clusterName.host;]]></script>
+    <in-binding>
+      <bind name="clusterName" type="VC:ClusterComputeResource" export-name="clusterName">
+        <description><![CDATA[vCenter cluster to provision to]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="hosts" type="Array/VC:HostSystem" export-name="hosts"></bind>
+    </out-binding>
+    <description><![CDATA[Get ESXi hosts from cluster]]></description>
+    <position y="55.40909090909091" x="644.5"></position>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item3" type="link" linked-workflow-id="2919ef1a-847e-4c42-97b9-8d3cd1f105ac">
+    <display-name><![CDATA[Get All FlashArray Hosts]]></display-name>
+    <in-binding>
+      <bind name="flashArrayConnection" type="PS:FlashArrayConnection" export-name="flashArrayConnection">
+        <description><![CDATA[FlashArray Connection]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="Array/PS:Host" export-name="result">
+        <description><![CDATA[List of flasharray hosts]]></description>
+      </bind>
+    </out-binding>
+    <description><![CDATA[Get list of all host object  in FlashArray]]></description>
+    <position y="55.40909090909091" x="824.5"></position>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item4" throw-bind-name="errorCode" type="task">
+    <display-name><![CDATA[Verify ESXi WWNs and IQNs]]></display-name>
+    <script encoded="false"><![CDATA[System.log("Verifying Esxi Host's WWNs and IQNs.");
+if(!hosts) throw "Esxi Hosts must not be empty";
+if(!result) throw "FlashArray Hosts must not be empty";
+
+hostResults = [];
+
+System.log("Found " + hosts.length + " ESXi hosts in the cluster");
+ 
+for (hostCount = 0; hostCount < hosts.length; hostCount++) {
+	System.log("Finding WWNs/IQNs for ESXi host named " + hosts[hostCount].name);
+	
+	var hostStorageSystem = VcPlugin.toManagedObject( hosts[hostCount], hosts[hostCount].configManager.storageSystem );
+	var hostBusAdapters = hostStorageSystem.storageDeviceInfo.hostBusAdapter;
+	var wwn;
+	var hostWwns = [];
+	var iqn;
+	var hostIqns = [];
+	if ( hostBusAdapters != null  &&  hostBusAdapters.length > 0 )  {
+		System.log( "Found " + hostBusAdapters.length + " storage adapters." );
+		for(var hbaCount=0; hbaCount < hostBusAdapters.length; hbaCount++ )  {
+			wwn = hostBusAdapters[hbaCount].portWorldWideNameHex;
+			if(wwn) {
+				System.log( "Device: " + hostBusAdapters[hbaCount].device + " Model: " + hostBusAdapters[hbaCount].model);
+				System.log( "WWN: " + wwn);
+				hostWwns.push(wwn.replace(/:/g,''));
+			}
+			
+			
+			iqn = hostBusAdapters[hbaCount].iScsiName;
+			if(iqn) {
+				System.log( "Device: " + hostBusAdapters[hbaCount].device + " Model: " + hostBusAdapters[hbaCount].model);
+				System.log( "IQN: " + iqn);
+				hostIqns.push(iqn);
+			}
+		}
+	}
+	else  {
+		System.log( "No storage adapters found" );
+	}
+	//find host on FlashArray with wwns and iqns
+	var hostName = null;
+	var index;
+	
+	//check for wwns
+	for(index = 0; index < hostWwns.length; index++) {
+		for (var faHostIndex = 0; faHostIndex < result.length; faHostIndex++) {
+			if(result[faHostIndex].wwn) {
+				if(result[faHostIndex].wwn.indexOf(hostWwns[index].toUpperCase()) > -1) {
+					System.debug("FlashArray Host: "+ result[faHostIndex].name +" found for wwn: "+ hostWwns[index]);
+					if(!hostName) {
+						hostName = result[faHostIndex].name;
+					}
+					else if(hostName != result[faHostIndex].name){
+						logHostError(result[faHostIndex].name);
+					}
+				}
+			}
+		}
+	} 
+	
+	//check for iqns
+	for(index = 0; index < hostIqns.length; index++) {
+		for (var faHostIndex = 0; faHostIndex < result.length; faHostIndex++) {
+			if(result[faHostIndex].iqn) {
+				if(result[faHostIndex].iqn.indexOf(hostIqns[index]) > -1) {
+					System.debug("FlashArray Host: "+ result[faHostIndex].name +" found for iqn: "+ hostIqns[index]);
+					if(!hostName) {
+						hostName = result[faHostIndex].name;
+					}
+					else if(hostName != result[faHostIndex].name){
+						logHostError(result[faHostIndex].name);
+					}
+				}
+			}
+		}
+	} 
+	
+if(hostName) {
+	hostResults.push(hostName);
+}
+	
+}
+System.log("Matching hosts found for all ESXi servers. The following hosts are found on the FlashArray:");
+
+for(var hostListCount=0; hostListCount < hostResults.length; hostListCount++ ) {
+	System.log(hostResults[hostListCount]);
+}
+
+function logHostError(wrongHostName) {
+		var hostError = "The host named " +  wrongHostName + " is misconfigured on the FlashArray. ESXi WWNs/IQNs are assigned to more than one host object on the FlashArray. Cannot continue."
+		System.error(hostError);
+		throw (hostError);
+}
+
+
+/* Old .. Only for WWNs
+var hostResults = [];
+System.log("Found " + hosts.length + " ESXi hosts in the cluster");
+for (esxiCount = 0; esxiCount <hosts.length; esxiCount++)
+{
+	System.log(hosts[esxiCount].name);
+} 
+for (hostCount = 0; hostCount < hosts.length; hostCount++) 
+{
+	System.log("Finding FC WWNs for ESXi host named " + hosts[hostCount].name);
+	var hostName = null;
+	var hostStorageSystem = VcPlugin.toManagedObject( hosts[hostCount], hosts[hostCount].configManager.storageSystem );
+	var hostBusAdapters = hostStorageSystem.storageDeviceInfo.hostBusAdapter;
+	var wwn;
+	var hostWwns = [];
+	if ( hostBusAdapters != null  &&  hostBusAdapters.length > 0 )  
+	{
+		System.log( "Found " + hostBusAdapters.length + " storage adapters." );
+		for(var hbaCount=0; hbaCount < hostBusAdapters.length; hbaCount++ )  
+		{
+			wwn = hostBusAdapters[hbaCount].portWorldWideNameHex;
+			if(wwn !== undefined){System.log( "Device: " + hostBusAdapters[hbaCount].device + " Model: " + hostBusAdapters[hbaCount].model)};
+			if(wwn !== undefined){System.log( "WWN: " + wwn)};
+			if(wwn !== undefined){hostWwns.push(wwn.replace(/:/g,''))};
+		}
+	}
+	else  
+	{
+		System.log( "No storage adapters found" );
+	}
+		for(var hostWwnCount=0; hostWwnCount < hostWwns.length; hostWwnCount++ )  
+	{
+		System.log( "Host WWN " + hostWwnCount + ": " + hostWwns[hostWwnCount]);
+	}
+	for (flasharrayHosts = 0; flasharrayHosts < result.length; flasharrayHosts++) 
+	{
+		for (wwnCount = 0; wwnCount < result[flasharrayHosts].wwn.length; wwnCount++) 
+		{
+			for(hostWwnCount=0; hostWwnCount < hostWwns.length; hostWwnCount++ )  
+			{
+				if(result[flasharrayHosts].wwn[wwnCount] == hostWwns[hostWwnCount].toUpperCase())
+				{
+					System.log(result[flasharrayHosts].name);
+					if (hostName == null)
+					{
+							hostName = result[flasharrayHosts].name;
+					}
+					if (hostName !== result[flasharrayHosts].name && hostName !== null)
+					{
+						var hostError = "The host named " +  result[flasharrayHosts].name + " is misconfigured on the FlashArray. ESXi WWNs are assigned to more than one host object on the FlashArray. Cannot continue."
+						System.error(hostError);
+						throw (hostError);
+					}
+					System.log(result[flasharrayHosts].wwn[wwnCount]);
+				}
+			}
+		}
+			
+	} 
+	if (hostName == null)
+	{
+		var hostError = ("No host object is configured on the FlashArray with one or more WWNs from the ESXi host " + hosts[hostCount].name); 
+		System.error(hostError);
+		throw (hostError);
+	}
+	else 
+	{
+		hostResults.push(hostName);
+	}
+}
+System.log("Matching hosts found for all ESXi servers. The following hosts are found on the FlashArray:");
+for(var hostListCount=0; hostListCount < hostResults.length; hostListCount++ )  
+{
+	System.log(hostResults[hostListCount]);
+}
+
+*/]]></script>
+    <in-binding>
+      <bind name="hosts" type="Array/VC:HostSystem" export-name="hosts">
+        <description><![CDATA[ESXi hosts]]></description>
+      </bind>
+      <bind name="result" type="Array/PS:Host" export-name="result">
+        <description><![CDATA[List of flasharray hosts]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="hostResults" type="Array/string" export-name="hostResults"></bind>
+    </out-binding>
+    <description><![CDATA[Verifies ESXi WWNs]]></description>
+    <position y="55.40909090909091" x="1024.5"></position>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item5" type="foreach">
+    <display-name><![CDATA[Foreach (Get Specific FlashArray Host)]]></display-name>
+    <in-binding>
+      <bind name="hostName" type="Array/string" export-name="*hostResults">
+        <description><![CDATA[Host Name]]></description>
+      </bind>
+      <bind name="flashArrayConnection" type="PS:FlashArrayConnection" export-name="flashArrayConnection">
+        <description><![CDATA[FlashArray Connection]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="Array/PS:Host" export-name="*flashArrayHosts"></bind>
+    </out-binding>
+    <reference type="Workflow" id="bd5b42c1-562c-4b98-b58e-e17b2c032456"></reference>
+    <description><![CDATA[Get specific FlashArray Host Object]]></description>
+    <position y="55.40909090909091" x="1224.5"></position>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item6" throw-bind-name="errorCode" type="task">
+    <display-name><![CDATA[Get HostGroup of all Hosts]]></display-name>
+    <script encoded="false"><![CDATA[for(i = 0; i < flashArrayHosts.length; i++)
+{
+	System.log("The host group for host " + flashArrayHosts[i].name + " is " + flashArrayHosts[i].hgroup);
+}
+var hgroupName = null
+for(i = 0; i < flashArrayHosts.length; i++)
+{
+		if (String(flashArrayHosts[i].hgroup) == "__NULL__")
+		{
+			var hgroupError = "The host named " + flashArrayHosts[i].name + " is not in a host group";
+			System.error(hgroupError);
+			throw (hgroupError);
+		}
+		if (i == 0)
+		{
+				hgroupName = flashArrayHosts[i].hgroup;
+		}
+		if (hgroupName !== flashArrayHosts[i].hgroup && i !== 0)
+		{
+			var hgroupError = "The hosts are spread across more than one host group on the FlashArray. Please make sure that the host group corresponds to the cluster. Cannot continue."
+			System.error(hgroupError);
+			throw (hgroupError);
+		}
+}
+System.log("The volume will be added to the host group named " + hgroupName);
+hostGroupObj = System.getModule("com.purestorage.flasharray.hostgroup").getSpecificFlashArrayHostGroup(hgroupName,flashArrayConnection) ;
+System.debug("host group object " + hostGroupObj);
+]]></script>
+    <in-binding>
+      <bind name="flashArrayHosts" type="Array/PS:Host" export-name="flashArrayHosts"></bind>
+      <bind name="flashArrayConnection" type="PS:FlashArrayConnection" export-name="flashArrayConnection">
+        <description><![CDATA[FlashArray Connection]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="hgroupName" type="string" export-name="hgroupName"></bind>
+      <bind name="hostGroupObj" type="PS:HostGroup" export-name="hostGroupObj"></bind>
+    </out-binding>
+    <position y="55.40909090909091" x="1464.5"></position>
+  </workflow-item>
+  <workflow-item name="item9" out-name="item10" type="task">
+    <display-name><![CDATA[Rescan hosts and Convert Data for VMFS creation]]></display-name>
+    <script encoded="false"><![CDATA[
+for (i = 0; i < hosts.length; i++){
+	System.getModule("com.vmware.library.vc.storage").rescanAll(hosts[i]);
+}
+
+vmfsHost = hosts[0];
+var toLowerCase = volResult.serial;
+toLowerCase = toLowerCase.toLowerCase();
+
+var scsiDevs = vmfsHost.configManager.storageSystem.storageDeviceInfo.scsiLun;
+
+System.log("The new device NAA is naa.624a9370" + toLowerCase);
+
+var devNaa = ("naa.624a9370" + toLowerCase);
+for (devs = 0; devs < scsiDevs.length; devs++){
+	if (scsiDevs[devs].canonicalName == devNaa){
+         diskName = scsiDevs[devs].displayName;
+         System.log("Found matching device " + diskName);
+    }
+}]]></script>
+    <in-binding>
+      <bind name="hosts" type="Array/VC:HostSystem" export-name="hosts"></bind>
+      <bind name="volResult" type="PS:Volume" export-name="volume"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="vmfsHost" type="VC:HostSystem" export-name="vmfsHost"></bind>
+      <bind name="diskName" type="string" export-name="diskName"></bind>
+    </out-binding>
+    <position y="219.04545454545453" x="924.5"></position>
+  </workflow-item>
+  <workflow-item name="item13" out-name="item16" type="task" script-module="com.purestorage.flasharray.volume/disconnectDestroyVolume">
+    <display-name><![CDATA[disconnectDestroyVolume]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.purestorage.flasharray.volume").disconnectDestroyVolume(volume,eradicate) ;]]></script>
+    <in-binding>
+      <bind name="volume" type="PS:Volume" export-name="volume">
+        <description><![CDATA[Volume to disconnect and destroy]]></description>
+      </bind>
+      <bind name="eradicate" type="boolean" export-name="eradicate"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="actionResult"></bind>
+    </out-binding>
+    <description><![CDATA[Disconnects volume if it connected to host or host groups. After disconnecting it destroys volume.]]></description>
+    <position y="319.0454545454545" x="404.5"></position>
+  </workflow-item>
+  <workflow-item name="item11" throw-bind-name="errorCode" type="end" end-mode="1">
+    <position y="309.0454545454545" x="724.5"></position>
+  </workflow-item>
+  <workflow-item name="item7" out-name="item8" type="task">
+    <display-name><![CDATA[volume created]]></display-name>
+    <script encoded="false"><![CDATA[//Volume is created
+isVolumeCreated = true;]]></script>
+    <in-binding>
+      <bind name="volume" type="PS:Volume" export-name="volume">
+        <description><![CDATA[Volume to disconnect and destroy]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="isVolumeCreated" type="boolean" export-name="isVolumeCreated"></bind>
+      <bind name="volume" type="PS:Volume" export-name="faVolumeCreated"></bind>
+    </out-binding>
+    <position y="219.04545454545453" x="1464.5"></position>
+  </workflow-item>
+  <workflow-item name="item12" out-name="item13" type="condition" alt-out-name="item14" comparator="0">
+    <display-name><![CDATA[is Rollback required?]]></display-name>
+    <script encoded="false"><![CDATA[//Generated by the system, cannot be edited
+return (isVolumeCreated == true) ;]]></script>
+    <in-binding>
+      <bind name="isVolumeCreated" type="boolean" export-name="isVolumeCreated"></bind>
+    </in-binding>
+    <condition name="isVolumeCreated" type="boolean" comparator="0" label="null">false</condition>
+    <position y="309.0454545454545" x="264.5"></position>
+  </workflow-item>
+  <workflow-item name="item14" throw-bind-name="errorCode" type="end" end-mode="1">
+    <position y="372.68181818181813" x="304.5"></position>
+  </workflow-item>
+  <workflow-item name="item10" out-name="item0" throw-bind-name="errorCode" type="link" linked-workflow-id="7b9957f4-8807-4103-9289-38bf34ef6b24">
+    <display-name><![CDATA[Create VMFS Datastore]]></display-name>
+    <in-binding>
+      <bind name="host" type="VC:HostSystem" export-name="vmfsHost">
+        <description><![CDATA[The vCenter Server host system]]></description>
+      </bind>
+      <bind name="diskName" type="string" export-name="diskName">
+        <description><![CDATA[The display name of the disk that will be used to contain the new VMFS datastore]]></description>
+      </bind>
+      <bind name="datastoreName" type="string" export-name="volName">
+        <description><![CDATA[The datastore name]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="datastore" type="VC:Datastore" export-name="datastore">
+        <description><![CDATA[The new datastore]]></description>
+      </bind>
+    </out-binding>
+    <description><![CDATA[Creates a datastore on a Fibre Channel, iSCSI or local SCSI disk. Only disks that are not currently in use by an existing VMFS are applicable to new datastore creation. The new datastore allocates the maximum available space of the specified disk.]]></description>
+    <position y="219.04545454545453" x="684.5"></position>
+  </workflow-item>
+  <workflow-item name="item6" out-name="item7" type="link" linked-workflow-id="7ea669b6-cb02-44bd-9739-d8556421554d">
+    <display-name><![CDATA[Create Volume]]></display-name>
+    <in-binding>
+      <bind name="name" type="string" export-name="volName">
+        <description><![CDATA[Volume Name (Only Alphabets, Numbers,_ and - are allowed)]]></description>
+      </bind>
+      <bind name="sizeInNumber" type="number" export-name="volSize">
+        <description><![CDATA[Provisioned Size in Number ]]></description>
+      </bind>
+      <bind name="flashArrayConnection" type="PS:FlashArrayConnection" export-name="flashArrayConnection">
+        <description><![CDATA[FlashArray Connection]]></description>
+      </bind>
+      <bind name="unitForSize" type="string" export-name="volUnit">
+        <description><![CDATA[Unit for Size]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="PS:Volume" export-name="volume"></bind>
+    </out-binding>
+    <description><![CDATA[Creates new volume]]></description>
+    <position y="137.22727272727272" x="1464.5"></position>
+  </workflow-item>
+  <workflow-item name="item8" out-name="item9" type="task" script-module="com.purestorage.flasharray.hostgroup/connectVolumeToHostGroup">
+    <display-name><![CDATA[connectVolumeToHostGroup]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.purestorage.flasharray.hostgroup").connectVolumeToHostGroup(volumeObj,hostGroupObj,flashArrayConnection) ;]]></script>
+    <in-binding>
+      <bind name="volumeObj" type="PS:Volume" export-name="volume">
+        <description><![CDATA[Volume]]></description>
+      </bind>
+      <bind name="hostGroupObj" type="PS:HostGroup" export-name="hostGroupObj">
+        <description><![CDATA[Host Group]]></description>
+      </bind>
+      <bind name="flashArrayConnection" type="PS:FlashArrayConnection" export-name="flashArrayConnection">
+        <description><![CDATA[FlashArray Connection]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="boolean" export-name="isVolumeConnected"></bind>
+    </out-binding>
+    <position y="219.04545454545453" x="1164.5"></position>
+  </workflow-item>
+  <workflow-item name="item15" out-name="item1" type="task">
+    <display-name><![CDATA[Validate size]]></display-name>
+    <script encoded="false"><![CDATA[var size=volSize+volUnit;
+
+if (size.match( /(KB|kb)/ ) )
+{
+	var sizeInKB = size.substring(0, size.length-2);
+	var sizeInBytes = (sizeInKB * 1024);
+	System.debug("The new capacity in bytes will be " + sizeInBytes);
+}
+else if (size.match( /(MB|mb)/ ) )
+{
+	var sizeInMB = size.substring(0, size.length-2);
+	var sizeInBytes = (sizeInMB * 1024 * 1024);
+	System.debug("The new capacity in bytes will be " + sizeInBytes);
+}
+else if (size.match( /(GB|gb)/ ) )
+{
+	var sizeInGB = size.substring(0, size.length-2);
+	var sizeInBytes = (sizeInGB * 1024 * 1024 * 1024);
+	System.debug("The new capacity in bytes will be " + sizeInBytes);
+} 
+else if (size.match( /(TB|tb)/ ) )
+{
+	var sizeInTB = size.substring(0, size.length-2);
+	var sizeInBytes = (sizeInTB * 1024 * 1024 * 1024 * 1024);
+	System.debug("The new capacity in bytes will be " + sizeInBytes);
+} 
+else if (size.match( /(PB|pb)/ ) )
+{
+	var sizeInPB = size.substring(0, size.length-2);
+	var sizeInBytes = (sizeInPB * 1024 * 1024 * 1024 * 1024 * 1024);
+	System.debug("The new capacity in bytes will be " + sizeInBytes);
+}
+else
+{
+	var sizeInBytes = size;
+	System.debug("The new capacity in bytes will be " + sizeInBytes);
+} 
+
+var minSizeInBytes = (1.3 * 1024 * 1024 * 1024);
+System.debug("The minimum size for datastore in bytes: " + minSizeInBytes);
+
+if (sizeInBytes < minSizeInBytes)
+{
+		var hostError = ("The given size is less than the required minimum size of a VMFS datastore. The required minimum size for a VMFS datastore is 1.3GB, however, the recommended minimum size is 2GB."); 
+		System.error(hostError);
+		throw (hostError);
+}
+else if (sizeInBytes >= minSizeInBytes)
+{
+		System.log("The new capacity is larger than the required minimum size for a VMFS datastore and therefore valid"); 
+}
+else 
+{
+		var hostError = ("Invalid size entry. Check input. Should be an integer, or an integer followed by KB,MB,GB,TB, or PB"); 
+		System.error(hostError);
+		throw (hostError);
+}]]></script>
+    <in-binding>
+      <bind name="volSize" type="number" export-name="volSize">
+        <description><![CDATA[Volume Size]]></description>
+      </bind>
+      <bind name="volUnit" type="string" export-name="volUnit">
+        <description><![CDATA[Unit]]></description>
+      </bind>
+    </in-binding>
+    <out-binding></out-binding>
+    <position y="55.40909090909091" x="484.5"></position>
+  </workflow-item>
+  <workflow-item name="item16" out-name="item11" type="task" script-module="com.purestorage.flasharray.volume/eradicateVolumeByName">
+    <display-name><![CDATA[eradicateVolumeByName]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.purestorage.flasharray.volume").eradicateVolumeByName(volumeName,flashArrayConnection) ;]]></script>
+    <in-binding>
+      <bind name="volumeName" type="string" export-name="actionResult">
+        <description><![CDATA[Volume Name]]></description>
+      </bind>
+      <bind name="flashArrayConnection" type="PS:FlashArrayConnection" export-name="flashArrayConnection">
+        <description><![CDATA[FlashArray Connection]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="actionResult"></bind>
+    </out-binding>
+    <description><![CDATA[Eradicates volume]]></description>
+    <position y="319.0454545454545" x="544.5"></position>
+  </workflow-item>
+  <workflow-item name="item17" out-name="item15" type="link" linked-workflow-id="f433f59b-d77d-42c8-9490-29f247b01b36">
+    <display-name><![CDATA[Pick Target FlashArray from Pure1]]></display-name>
+    <in-binding>
+      <bind name="analysisPeriod" type="string" export-name="analysisPeriod"></bind>
+      <bind name="aggregation" type="string" export-name="aggregation"></bind>
+      <bind name="advancedOptions" type="boolean" export-name="advancedOptions"></bind>
+      <bind name="flashArrays" type="Array/PS:FlashArrayConnection" export-name="flashArrays"></bind>
+      <bind name="capacityThreshold" type="number" export-name="capacityThreshold"></bind>
+      <bind name="finalCapacityThreshold" type="number" export-name="finalCapacityThreshold"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="flasharrayConnection" type="PS:FlashArrayConnection" export-name="flashArrayConnection"></bind>
+    </out-binding>
+    <description><![CDATA[Returns the percent total busy of a specified FlashArray over a given time (default maximum value over 30 days).
+
+This window can be changed to 1 day or 1 week as well as average instead of maximum.]]></description>
+    <position y="55.40909090909091" x="344.5"></position>
+  </workflow-item>
+  <workflow-item name="item18" out-name="item17" type="task" script-module="com.purestorage.pure1.arrays/findFlashArraysWithAccessToCluster">
+    <display-name><![CDATA[findFlashArraysWithAccessToCluster]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.purestorage.pure1.arrays").findFlashArraysWithAccessToCluster(cluster) ;]]></script>
+    <in-binding>
+      <bind name="cluster" type="VC:ClusterComputeResource" export-name="clusterName"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="Array/PS:FlashArrayConnection" export-name="flashArrays"></bind>
+    </out-binding>
+    <description><![CDATA[Loops through registed FlashArrays to see if they have a proper host group for the specified cluster.]]></description>
+    <position y="55.40909090909091" x="204.5"></position>
+  </workflow-item>
+  <presentation>
+    <p-group>
+      <title><![CDATA[Configuration Parameters]]></title>
+      <p-param name="clusterName">
+        <desc><![CDATA[vCenter cluster to provision VMFS Datastore]]></desc>
+        <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+        <p-qual name="contextualParameter" type="void"><![CDATA[__NULL__]]></p-qual>
+      </p-param>
+    </p-group>
+    <p-group>
+      <title><![CDATA[Create VMFS Datastore]]></title>
+      <p-param name="volName">
+        <desc><![CDATA[VMFS Datastore Name ]]></desc>
+        <p-qual kind="static" name="regexp" type="Regexp"><![CDATA[^[0-9A-Za-z]([-_]*[0-9A-Za-z]){0,62}$]]></p-qual>
+        <p-qual kind="static" name="minStringLength" type="Number"><![CDATA[1]]></p-qual>
+        <p-qual kind="static" name="maxStringLength" type="Number"><![CDATA[63]]></p-qual>
+        <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+      </p-param>
+      <p-param name="volSize">
+        <desc><![CDATA[VMFS Datastore Size ]]></desc>
+        <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+      </p-param>
+      <p-param name="volUnit">
+        <desc><![CDATA[Unit]]></desc>
+        <p-qual kind="static" name="defaultValue" type="string"><![CDATA[TB]]></p-qual>
+        <p-qual kind="ognl" name="linkedEnumeration" type="Array/string"><![CDATA[GetAction("com.purestorage.flasharray.volume","getUnitsForSize").call()]]></p-qual>
+      </p-param>
+    </p-group>
+    <p-group>
+      <title><![CDATA[Advanced Options]]></title>
+      <p-param name="advancedOptions">
+        <desc><![CDATA[Customize analysis window?]]></desc>
+        <p-qual kind="static" name="defaultValue" type="boolean"><![CDATA[__NULL__]]></p-qual>
+      </p-param>
+      <p-param name="analysisPeriod">
+        <desc><![CDATA[Choose the analysis period]]></desc>
+        <p-qual kind="static" name="defaultValue" type="string"><![CDATA[Last month]]></p-qual>
+        <p-qual kind="static" name="genericEnumeration" type="Array/string"><![CDATA[#{#string#Last month#;#string#Last week#;#string#Last day#}#]]></p-qual>
+        <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#advancedOptions]]></p-qual>
+      </p-param>
+      <p-param name="aggregation">
+        <desc><![CDATA[Calculate the average or maximum?]]></desc>
+        <p-qual kind="static" name="genericEnumeration" type="Array/string"><![CDATA[#{#string#Maximum#;#string#Average#}#]]></p-qual>
+        <p-qual kind="static" name="defaultValue" type="string"><![CDATA[Maximum]]></p-qual>
+        <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#advancedOptions]]></p-qual>
+      </p-param>
+      <p-param name="capacityThreshold">
+        <desc><![CDATA[Enter a percentage capacity full (between 0 and 1) you would like to have the workflow look for less full alternatives by looking at next less busy arrays]]></desc>
+        <p-qual kind="static" name="numberFormat" type="String"><![CDATA[##.###]]></p-qual>
+        <p-qual kind="static" name="defaultValue" type="number"><![CDATA[0.75]]></p-qual>
+        <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#advancedOptions]]></p-qual>
+      </p-param>
+      <p-param name="finalCapacityThreshold">
+        <desc><![CDATA[Enter a percentage capacity full (between 0 and 1) you would like to have the workflow never provision from]]></desc>
+        <p-qual kind="static" name="numberFormat" type="String"><![CDATA[##.###]]></p-qual>
+        <p-qual kind="static" name="defaultValue" type="number"><![CDATA[0.9]]></p-qual>
+        <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#advancedOptions]]></p-qual>
+      </p-param>
+    </p-group>
+  </presentation>
+</workflow>

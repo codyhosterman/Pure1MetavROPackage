@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">com.purestorage.flasharray.host</entry>
+<entry key="categoryPathEscaped">Y29t.cHVyZXN0b3JhZ2U=.Zmxhc2hhcnJheQ==.aG9zdA==</entry>
+<entry key="name">getSpecificFlashArrayHost</entry>
+<entry key="type">ScriptModule</entry>
+<entry key="id">a3cfd8e1-8fbf-43cb-ae51-fdf50834f30e</entry>
+</properties>

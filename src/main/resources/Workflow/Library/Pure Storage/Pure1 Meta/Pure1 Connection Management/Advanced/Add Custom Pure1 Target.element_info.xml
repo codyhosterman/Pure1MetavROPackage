@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">Library.Pure Storage.Pure1 Meta.Pure1 Connection Management.Advanced</entry>
+<entry key="categoryPathEscaped">TGlicmFyeQ==.UHVyZSBTdG9yYWdl.UHVyZTEgTWV0YQ==.UHVyZTEgQ29ubmVjdGlvbiBNYW5hZ2VtZW50.QWR2YW5jZWQ=</entry>
+<entry key="name">Add Custom Pure1 Target</entry>
+<entry key="type">Workflow</entry>
+<entry key="id">cb9e0191-aa41-42dc-b272-cfc9466389b3</entry>
+</properties>

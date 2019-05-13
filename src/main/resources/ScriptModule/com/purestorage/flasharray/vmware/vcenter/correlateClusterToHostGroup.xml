@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="correlateClusterToHostGroup" result-type="PS:HostGroup" api-version="6.0.0" id="c3ba383c-f667-4a52-bcdf-77ea9d390e57" version="0.0.3" allowed-operations="vef">
+  <description><![CDATA[It correlates cluster to specific hostgroup.]]></description>
+  <param n="clusterName" t="VC:ClusterComputeResource"><![CDATA[vCenter Cluster Object]]></param>
+  <param n="flashArrayConnection" t="PS:FlashArrayConnection"><![CDATA[Flash Array Connection]]></param>
+  <script encoded="false"><![CDATA[if(!clusterName) {
+	System.error("vCenter Cluster object is null");
+	return null;
+}
+var hosts = clusterName.host; //vCenter Cluster host list
+var host;
+var restSession = PSSessionManager.getSession(flashArrayConnection);
+if(!hosts) throw "Esxi Hosts must not be empty";
+
+for(i=0;i<hosts.length;i++){
+host = System.getModule("com.purestorage.flasharray.vmware.vcenter").correlateESXiToHost(hosts[i],flashArrayConnection);
+if(host){
+if (String(host.hgroup) == "__NULL__")
+		{
+			var hgroupError = "The host named " + host.name + " is not in a host group";
+			System.error(hgroupError);
+			throw (hgroupError);
+		}
+		if (i == 0)
+		{
+				hgroupName = host.hgroup;
+		}
+		if (hgroupName !== host.hgroup && i !== 0)
+		{
+			var hgroupError = "The hosts are spread across more than one host group on the FlashArray. Please make sure that the host group corresponds to the cluster. Cannot continue."
+			System.error(hgroupError);
+			throw (hgroupError);
+		}
+
+}
+}
+
+hostGroupObj = PSHostGroupManager.getHostGroup(hgroupName,restSession) ;
+System.debug("Host group object : " + hostGroupObj);
+System.log("Host group named : " + hostGroupObj.name + " found.");
+return hostGroupObj;]]></script>
+</dunes-script-module>

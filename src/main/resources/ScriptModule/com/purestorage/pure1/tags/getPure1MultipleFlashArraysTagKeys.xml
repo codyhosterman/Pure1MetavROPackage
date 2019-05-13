@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="getPure1MultipleFlashArraysTagKeys" result-type="Array/string" api-version="6.0.0" id="4c83df49-b89d-4577-91ba-78473239737e" version="1.0.0" allowed-operations="vef">
+  <description><![CDATA[Returns the tag key names of the specified FlashArray from Pure1.]]></description>
+  <param n="flasharray" t="Array/PS:FlashArrayConnection"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[if (flasharray == null)
+{
+	throw "You must enter in a FlashArray connection";
+}
+var restHost = System.getModule("com.purestorage.pure1.connection").getPure1RestHost();
+System.debug("Using REST host " + restHost.name);
+var pureOneToken = System.getModule("com.purestorage.pure1.connection").pure1AuthenticateSession(restHost,null)
+var arrayNames = "";
+for (var i = 0;i < flasharray.length;i++)
+{
+	var faObject = PSFlashArrayManager.getFlashArray(flasharray[i]);
+	arrayNames = arrayNames + "'" + faObject.name + "'"
+	if (i != (flasharray.length -1))
+	{
+		arrayNames = arrayNames + ","
+	}
+}
+var request = restHost.createRequest("GET", "/api/1.latest/arrays/tags?resource_names=" + arrayNames);
+var bearerToken = "Bearer " + pureOneToken;
+request.setHeader("Authorization", bearerToken);
+var response = request.execute();
+//handle exceeding rate limit if encountered and retrying once. Refer to response headers for rate limits.
+if (response.statusCode == 429)
+{
+	var headers = response.getAllHeaders();
+	System.debug("API operations left this minute: " + headers.get("X-RateLimit-Remaining-minute"));
+	System.debug("API operations left this second: " + headers.get("X-RateLimit-Remaining-second"));
+	if (headers.get("X-RateLimit-Remaining-minute") == 0)
+	{
+		System.warn("Overran the per-minute Pure1 REST API rate limit...pausing for a minute and retrying.");
+		System.sleep(60000);
+	}
+	else
+	{
+		System.debug("Overran the per-second Pure1 REST API rate limit...quickly pausing and retrying.");
+		System.sleep(1000);
+	}
+	var response = request.execute();
+}
+if (response.statusCode != 200)
+{
+	throw "Pure1 " + response.statusCode + " Error: " + (JSON.parse(response.ContentAsString)).message;
+}
+else
+{
+	//parse pure1 response
+	System.debug(response.ContentAsString);
+	var reponsePayload = (JSON.parse(response.ContentAsString)).items;
+}
+
+var tags = reponsePayload;
+System.log("Retrieved " + tags.length + " tags");
+var arrayTags = [];
+for (var i = 0; i < tags.length;i++)
+{
+	if ((arrayTags.indexOf(tags[i].key)) == -1)
+	{
+		arrayTags.push(tags[i].key);
+	}
+}
+return arrayTags;]]></script>
+</dunes-script-module>

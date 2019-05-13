@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">com.purestorage.pure1.helper</entry>
+<entry key="categoryPathEscaped">Y29t.cHVyZXN0b3JhZ2U=.cHVyZTE=.aGVscGVy</entry>
+<entry key="name">findPureVVolDatastores</entry>
+<entry key="type">ScriptModule</entry>
+<entry key="id">838efb0a-014b-464f-bf24-4d4a70e6ba69</entry>
+</properties>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="pure1AuthenticateSession" result-type="string" api-version="6.0.0" id="420b0d49-45c3-4f40-8b8a-3cc44bae1b8f" version="1.0.1" allowed-operations="vef">
+  <description><![CDATA[Returns access token from default configuration element or specified element. No inputs required by default.]]></description>
+  <param n="restHost" t="REST:RESTHost"><![CDATA[]]></param>
+  <param n="pureOneConnection" t="ConfigurationElement"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[if (restHost == null)
+{
+	restHost = System.getModule("com.purestorage.pure1.connection").getPure1RestHost();
+	if (restHost == null)
+	{
+		throw "No Pure1 REST target found";
+	}
+	System.debug("Using REST host " + restHost.name);
+}
+if (pureOneConnection != null)
+{
+	var pureConfigElement = pureOneConnection;
+}
+else
+{
+	var configCategory = Server.getConfigurationElementCategoryWithPath("Pure1/");
+	var configElements = configCategory.allConfigurationElements;
+	for (var i=0;i < configElements.length;i++)
+	{
+		System.debug("Looking at element " + configElements[i].name);
+		if (configElements[i].name == "Connection")
+		{
+			var pureConfigElement = configElements[i];
+			break;
+		}
+	}
+}
+if (pureConfigElement == null)
+{
+	throw "Default Pure1 connection not found. Pass in a custom one or run connection workflow to create default connection";
+}
+System.debug("Using configuration element " + pureConfigElement.name);
+try
+{
+	var applicationId = pureConfigElement.getAttributeWithKey("applicationID").value
+}
+catch (e)
+{
+	throw "No application ID found. Please refresh credentials";
+}
+try
+{
+	var privateKey = pureConfigElement.getAttributeWithKey("privateKey").value
+}
+catch (e)
+{
+	throw "No private key found. Please refresh credentials";
+}
+var newJwt = PSJWTManager.generateJWT(privateKey,applicationId);
+var requestContent = ("grant_type=urn:ietf:params:oauth:grant-type:token-exchange&subject_token=" + newJwt + "&subject_token_type=urn:ietf:params:oauth:token-type:jwt");
+var request = restHost.createRequest("POST", "/oauth2/1.0/token", requestContent);
+request.contentType = "application/x-www-form-urlencoded";
+System.log("Connecting to Pure1...");
+System.debug(request.fullUrl);
+var response = request.execute();
+if (response.statusCode != 200)
+{
+	throw "Pure1 " + response.statusCode + " Error: " + (JSON.parse(response.ContentAsString)).message;
+}
+else
+{
+	System.log("Connection to Pure1 successful!");
+}
+var token = JSON.parse(response.contentAsString);
+return token.access_token;
+
+ 
+]]></script>
+</dunes-script-module>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item2" object-name="workflow:name=generic" id="6ec98eb6-1241-400a-8416-e3a03fa97905" version="1.0.0" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Find Percent Total Busy of FlashArray]]></display-name>
+  <description><![CDATA[Returns the percent total busy of a specified FlashArray over a given time (default maximum value over 30 days).
+
+This window can be changed to 1 day or 1 week as well as average instead of maximum.]]></description>
+  <position y="50.0" x="100.0"></position>
+  <input>
+    <param name="analysisPeriod" type="string"></param>
+    <param name="aggregation" type="string"></param>
+    <param name="advancedOptions" type="boolean"></param>
+    <param name="flashArray" type="PS:FlashArrayConnection"></param>
+  </input>
+  <attrib name="restHost" type="REST:RESTHost" read-only="false"></attrib>
+  <attrib name="pureOneConnection" type="ConfigurationElement" read-only="false"></attrib>
+  <attrib name="pureOneToken" type="string" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="analysisPeriodDays" type="number" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="busyMeter" type="number" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="aggAbrev" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="arrayName" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="45.40909090909091" x="684.5"></position>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item3" type="task" script-module="com.purestorage.pure1.connection/pure1AuthenticateSession">
+    <display-name><![CDATA[pure1AuthenticateSession]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.purestorage.pure1.connection").pure1AuthenticateSession(restHost,pureOneConnection) ;]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="pureOneConnection" type="ConfigurationElement" export-name="pureOneConnection"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="pureOneToken"></bind>
+    </out-binding>
+    <description><![CDATA[Returns access token from default configuration element or specified element. No inputs required by default.]]></description>
+    <position y="55.40909090909091" x="204.5"></position>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item1" type="task">
+    <display-name><![CDATA[Calculate Window]]></display-name>
+    <script encoded="false"><![CDATA[if (analysisPeriod == "Last day")
+{
+	analysisPeriodDays = 1;
+}
+else if (analysisPeriod == "Last week")
+{
+	analysisPeriodDays = 7;
+}
+else if (analysisPeriod == "Last month")
+{
+	analysisPeriodDays = 30;
+}
+if (aggregation == "Maximum")
+{
+	aggAbrev = "max";
+}
+else if (aggregation == "Average")
+{
+	aggAbrev = "avg";
+}
+arrayName = (PSFlashArrayManager.getFlashArray(flashArray)).name;]]></script>
+    <in-binding>
+      <bind name="analysisPeriod" type="string" export-name="analysisPeriod"></bind>
+      <bind name="aggregation" type="string" export-name="aggregation"></bind>
+      <bind name="flashArray" type="PS:FlashArrayConnection" export-name="flashArray"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="analysisPeriodDays" type="number" export-name="analysisPeriodDays"></bind>
+      <bind name="aggAbrev" type="string" export-name="aggAbrev"></bind>
+      <bind name="arrayName" type="string" export-name="arrayName"></bind>
+    </out-binding>
+    <position y="55.40909090909091" x="344.5"></position>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.purestorage.pure1.arrays/getPure1ArrayBusyMeter">
+    <display-name><![CDATA[getPure1ArrayBusyMeter]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.purestorage.pure1.arrays").getPure1ArrayBusyMeter(restHost,pureOneToken,analysisPeriodDays,aggregation,arrayName) ;]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="pureOneToken" type="string" export-name="pureOneToken"></bind>
+      <bind name="analysisPeriodDays" type="number" export-name="analysisPeriodDays"></bind>
+      <bind name="aggregation" type="string" export-name="aggAbrev"></bind>
+      <bind name="arrayName" type="string" export-name="arrayName"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="number" export-name="busyMeter"></bind>
+    </out-binding>
+    <description><![CDATA[Return the array busy meter metric for a specified period. Average or maximum.]]></description>
+    <position y="55.90909090909091" x="505.0"></position>
+  </workflow-item>
+  <presentation>
+    <p-param name="flashArray">
+      <desc><![CDATA[Choose a FlashArray]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+    <p-param name="advancedOptions">
+      <desc><![CDATA[Customize analysis window?]]></desc>
+      <p-qual kind="static" name="defaultValue" type="boolean"><![CDATA[__NULL__]]></p-qual>
+    </p-param>
+    <p-param name="analysisPeriod">
+      <desc><![CDATA[Choose the analysis period:]]></desc>
+      <p-qual kind="static" name="genericEnumeration" type="Array/string"><![CDATA[#{#string#Last month#;#string#Last week#;#string#Last day#}#]]></p-qual>
+      <p-qual kind="static" name="defaultValue" type="string"><![CDATA[Last month]]></p-qual>
+      <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#advancedOptions]]></p-qual>
+    </p-param>
+    <p-param name="aggregation">
+      <desc><![CDATA[Calculate the average or maximum?]]></desc>
+      <p-qual kind="static" name="genericEnumeration" type="Array/string"><![CDATA[#{#string#Maximum#;#string#Average#}#]]></p-qual>
+      <p-qual kind="static" name="defaultValue" type="string"><![CDATA[Maximum]]></p-qual>
+      <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#advancedOptions]]></p-qual>
+    </p-param>
+  </presentation>
+</workflow>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="findPureVMFSDatastores" result-type="SecureString" api-version="6.0.0" id="30dd26d2-4ddc-443c-a9f6-b0e1dc8fc5a7" version="1.0.0" allowed-operations="vef">
+  <description><![CDATA[Ensure that all passed in datastores are Pure Storage VMFS datastores]]></description>
+  <param n="datastores" t="Array/VC:Datastore"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[if (datastores == null)
+{
+ 	return null;
+}
+for (var dsCount = 0; dsCount < datastores.length; dsCount++)
+{
+	if (datastores[dsCount].summary.type == "VMFS")
+	{
+		if (datastores[dsCount].info.vmfs.extent[0].diskName.indexOf("naa.624a93") != -1)
+		{
+			continue;
+		}
+		else
+		{
+			 return ("Found a non-Pure Storage VMFS datastore called " + datastores[dsCount].name + ".");
+		}
+	}
+	else
+	{
+		return ("Found a non-VMFS datastore called " + datastores[dsCount].name + ".");
+	}
+}
+return null;]]></script>
+</dunes-script-module>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">com.purestorage.pure1.arrays</entry>
+<entry key="categoryPathEscaped">Y29t.cHVyZXN0b3JhZ2U=.cHVyZTE=.YXJyYXlz</entry>
+<entry key="name">getPure1ArrayBusyMeter</entry>
+<entry key="type">ScriptModule</entry>
+<entry key="id">c1c8787c-7ed2-43e6-9ead-e499ddf29a78</entry>
+</properties>

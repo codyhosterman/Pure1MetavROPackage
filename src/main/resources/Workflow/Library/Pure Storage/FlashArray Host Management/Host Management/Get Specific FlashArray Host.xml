@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="bd5b42c1-562c-4b98-b58e-e17b2c032456" version="2.1.1" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Get Specific FlashArray Host]]></display-name>
+  <description><![CDATA[Retrieve information on a specific host.]]></description>
+  <ref-types><![CDATA[>(PS:FlashArrayConnection)]]></ref-types>
+  <position y="50.0" x="100.0"></position>
+  <input>
+    <param name="hostName" type="string">
+      <description><![CDATA[Host Name]]></description>
+    </param>
+    <param name="flashArrayConnection" type="PS:FlashArrayConnection">
+      <description><![CDATA[FlashArray Connection]]></description>
+    </param>
+  </input>
+  <output>
+    <param name="actionResult" type="PS:Host">
+      <description><![CDATA[FlashArray Host Object]]></description>
+    </param>
+  </output>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="45.40909090909091" x="404.5"></position>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.purestorage.flasharray.host/getSpecificFlashArrayHost">
+    <display-name><![CDATA[getSpecificFlashArrayHost]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.purestorage.flasharray.host").getSpecificFlashArrayHost(hostName,flashArrayConnection) ;]]></script>
+    <in-binding>
+      <bind name="hostName" type="string" export-name="hostName">
+        <description><![CDATA[Host Name]]></description>
+      </bind>
+      <bind name="flashArrayConnection" type="PS:FlashArrayConnection" export-name="flashArrayConnection">
+        <description><![CDATA[FlashArray Connection]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="PS:Host" export-name="actionResult"></bind>
+    </out-binding>
+    <description><![CDATA[Get specific  FlashArray host.]]></description>
+    <position y="55.90909090909091" x="205.0"></position>
+  </workflow-item>
+  <presentation>
+    <p-step>
+      <title><![CDATA[Get FlashArray Host]]></title>
+      <p-group>
+        <title><![CDATA[Select FlashArray Connection]]></title>
+        <p-param name="flashArrayConnection">
+          <desc><![CDATA[FlashArray Connection]]></desc>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+          <p-qual name="contextualParameter" type="void"><![CDATA[__NULL__]]></p-qual>
+        </p-param>
+      </p-group>
+      <p-group>
+        <title><![CDATA[FlashArray Host Name]]></title>
+        <p-param name="hostName">
+          <desc><![CDATA[FlashArray Host Name]]></desc>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+        </p-param>
+      </p-group>
+    </p-step>
+  </presentation>
+</workflow>

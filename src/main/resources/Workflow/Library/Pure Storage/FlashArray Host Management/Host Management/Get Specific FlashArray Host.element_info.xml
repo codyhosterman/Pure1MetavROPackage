@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">Library.Pure Storage.FlashArray Host Management.Host Management</entry>
+<entry key="categoryPathEscaped">TGlicmFyeQ==.UHVyZSBTdG9yYWdl.Rmxhc2hBcnJheSBIb3N0IE1hbmFnZW1lbnQ=.SG9zdCBNYW5hZ2VtZW50</entry>
+<entry key="name">Get Specific FlashArray Host</entry>
+<entry key="type">Workflow</entry>
+<entry key="id">bd5b42c1-562c-4b98-b58e-e17b2c032456</entry>
+</properties>

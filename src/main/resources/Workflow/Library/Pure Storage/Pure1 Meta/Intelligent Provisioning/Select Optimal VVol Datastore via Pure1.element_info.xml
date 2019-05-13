@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">Library.Pure Storage.Pure1 Meta.Intelligent Provisioning</entry>
+<entry key="categoryPathEscaped">TGlicmFyeQ==.UHVyZSBTdG9yYWdl.UHVyZTEgTWV0YQ==.SW50ZWxsaWdlbnQgUHJvdmlzaW9uaW5n</entry>
+<entry key="name">Select Optimal VVol Datastore via Pure1</entry>
+<entry key="type">Workflow</entry>
+<entry key="id">17cc067d-83b4-4cc3-a7c5-5128b89b4d2e</entry>
+</properties>

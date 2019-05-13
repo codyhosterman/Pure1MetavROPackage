@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="correlateESXiToHost" result-type="PS:Host" api-version="6.0.0" id="ceb5013e-b71f-4456-a8b3-1a1ac7769b62" version="0.0.3" allowed-operations="vef">
+  <description><![CDATA[Returns Correlated  Flash Array Host of given ESXi host .]]></description>
+  <param n="esxiHost" t="VC:HostSystem"><![CDATA[ESXi Host Name]]></param>
+  <param n="flashArrayConnection" t="PS:FlashArrayConnection"><![CDATA[FlashArray Connection]]></param>
+  <script encoded="false"><![CDATA[if(!esxiHost){
+throw "ESXi Host must not be empty";
+}
+var restSession = PSSessionManager.getSession(flashArrayConnection);
+System.debug("Verifying Esxi Host WWNs and IQNs.");
+var hostStorageSystem = VcPlugin.toManagedObject( esxiHost, esxiHost.configManager.storageSystem );
+	var hostBusAdapters = hostStorageSystem.storageDeviceInfo.hostBusAdapter;
+	var hostWwns = [];
+	var hostIqns = [];
+	if ( hostBusAdapters != null  &&  hostBusAdapters.length > 0 )  {
+		System.debug( "Found " + hostBusAdapters.length + " storage adapters." );
+		for(var hbaCount=0; hbaCount < hostBusAdapters.length; hbaCount++ )  {
+			var wwn = hostBusAdapters[hbaCount].portWorldWideNameHex;
+			if(wwn) {
+				System.debug( "Device: " + hostBusAdapters[hbaCount].device + " Model: " + hostBusAdapters[hbaCount].model);
+				System.log( "WWN: " + wwn);
+			    hostWwns.push(wwn.replace(/:/g,''));
+			}
+
+			 var iqn = hostBusAdapters[hbaCount].iScsiName;
+			if(iqn) {
+				System.debug( "Device: " + hostBusAdapters[hbaCount].device + " Model: " + hostBusAdapters[hbaCount].model);
+				System.log( "IQN: " + iqn);
+				hostIqns.push(iqn);
+			}
+		}
+	}
+	var psHosts = PSHostManager.getHosts(restSession);
+	for(var j = 0; j < hostWwns.length; j++)
+	{
+		for(var i = 0;i<psHosts.length;i++){
+			if(psHosts[i].wwn.indexOf(hostWwns[j].toUpperCase()) > -1){
+				System.debug("Matching host is " + psHosts[i].name);
+				return psHosts[i];
+			}
+		}
+	}
+	for (var j = 0; j < hostIqns.length; j++)
+	{
+		for(var i = 0; i < psHosts.length; i++){
+			if(psHosts[i].iqn.indexOf(hostIqns[j]) > -1){
+				System.debug("Matching host is " + psHosts[i].name);
+				return psHosts[i];
+			}
+		}
+	}
+	
+	var hostError = "There is no correlation found in Flash Array host list for ESXi host "+ esxiHost.name;
+		System.error(hostError);
+		throw (hostError);
+]]></script>
+</dunes-script-module>

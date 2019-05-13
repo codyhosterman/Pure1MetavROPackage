@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="findPureVVolDatastores" result-type="SecureString" api-version="6.0.0" id="838efb0a-014b-464f-bf24-4d4a70e6ba69" version="1.0.0" allowed-operations="vef">
+  <description><![CDATA[Ensure that all passed in datastores are Pure Storage VVol datastores]]></description>
+  <param n="datastores" t="Array/VC:Datastore"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[if (datastores == null)
+{
+ 	return null;
+}
+for (var dsCount = 0; dsCount < datastores.length; dsCount++)
+{
+	if (datastores[dsCount].summary.type == "VVOL")
+	{
+		if (datastores[dsCount].info.vvolDS.storageArray[0].vendorId == "PURE")
+		{
+			continue;
+		}
+		else
+		{
+			 return ("Found a non-Pure Storage VVol datastore called " + datastores[dsCount].name + ".");
+		}
+	}
+	else
+	{
+		return ("Found a non-VVol datastore called " + datastores[dsCount].name + ".");
+	}
+}
+return null;]]></script>
+</dunes-script-module>

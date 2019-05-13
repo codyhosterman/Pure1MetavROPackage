@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item9" object-name="workflow:name=generic" id="17cc067d-83b4-4cc3-a7c5-5128b89b4d2e" version="1.0.0" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Select Optimal VVol Datastore via Pure1]]></display-name>
+  <description><![CDATA[Takes in a compute cluster or a selection of VVol datastores and returns the optimal one. If there is more than 1 datastore on the best array, it will return the datastore with the most free capacity.]]></description>
+  <position y="9.545454545454543" x="25.0"></position>
+  <input>
+    <param name="inputVvolDatastores" type="Array/VC:Datastore"></param>
+    <param name="analysisPeriod" type="string"></param>
+    <param name="aggregation" type="string"></param>
+    <param name="advancedOptions" type="boolean"></param>
+    <param name="capacityThreshold" type="number"></param>
+    <param name="finalCapacityThreshold" type="number"></param>
+    <param name="cluster" type="VC:ClusterComputeResource"></param>
+    <param name="typeChoice" type="string"></param>
+  </input>
+  <output>
+    <param name="bestDatastore" type="VC:Datastore"></param>
+  </output>
+  <attrib name="datastore" type="VC:Datastore" read-only="false">
+    <description><![CDATA[vCenter Datastore]]></description>
+  </attrib>
+  <attrib name="dsCounter" type="number" read-only="false">
+    <value encoded="n"><![CDATA[0.0]]></value>
+    <description><![CDATA[counter to increment]]></description>
+  </attrib>
+  <attrib name="flashArrays" type="Array/PS:FlashArrayConnection" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="optimalFlashArray" type="PS:FlashArrayConnection" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="vvolDatastores" type="Array/VC:Datastore" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="faConnection" type="PS:FlashArrayConnection" read-only="false"></attrib>
+  <workflow-item name="item2" out-name="item1" type="task">
+    <display-name><![CDATA[Iterate Datastore]]></display-name>
+    <script encoded="false"><![CDATA[datastore = vmfsDatastores[dsCounter];]]></script>
+    <in-binding>
+      <bind name="vmfsDatastores" type="Array/VC:Datastore" export-name="vvolDatastores"></bind>
+      <bind name="dsCounter" type="number" export-name="dsCounter">
+        <description><![CDATA[counter to increment]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="datastore" type="VC:Datastore" export-name="datastore">
+        <description><![CDATA[vCenter Datastore]]></description>
+      </bind>
+    </out-binding>
+    <position y="19.045454545454543" x="264.5"></position>
+  </workflow-item>
+  <workflow-item name="item3" prototype-id="increase-counter" out-name="item0" content-mode="x" type="task">
+    <display-name><![CDATA[Increase counter]]></display-name>
+    <script encoded="false"><![CDATA[//Auto-generated script
+counter = counter+1;]]></script>
+    <in-binding>
+      <bind name="counter" type="number" export-name="dsCounter">
+        <description><![CDATA[counter to increment]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="counter" type="number" export-name="dsCounter">
+        <description><![CDATA[counter incremented]]></description>
+      </bind>
+    </out-binding>
+    <description><![CDATA[Increment a counter by one]]></description>
+    <position y="73.59090909090908" x="544.5"></position>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item3" type="task">
+    <display-name><![CDATA[Filter Duplicate Arrays]]></display-name>
+    <script encoded="false"><![CDATA[if (flashArrays == null)
+{
+	var flashArrays = [];
+}
+if (flashArrays.indexOf(faConnection) == -1)
+{
+	flashArrays.push(faConnection);
+}]]></script>
+    <in-binding>
+      <bind name="flashArrays" type="Array/PS:FlashArrayConnection" export-name="flashArrays"></bind>
+      <bind name="faConnection" type="PS:FlashArrayConnection" export-name="faConnection"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="flashArrays" type="Array/PS:FlashArrayConnection" export-name="flashArrays"></bind>
+    </out-binding>
+    <position y="19.045454545454543" x="544.5"></position>
+  </workflow-item>
+  <workflow-item name="item0" out-name="item6" type="custom-condition" alt-out-name="item2">
+    <display-name><![CDATA[Custom decision]]></display-name>
+    <script encoded="false"><![CDATA[if (dsCounter == vvolDatastores.length)
+{
+	return true;
+}
+else
+{
+	return false;
+}	]]></script>
+    <in-binding>
+      <bind name="vvolDatastores" type="Array/VC:Datastore" export-name="vvolDatastores"></bind>
+      <bind name="dsCounter" type="number" export-name="dsCounter"></bind>
+    </in-binding>
+    <position y="63.59090909090908" x="264.5"></position>
+  </workflow-item>
+  <workflow-item name="item6" out-name="item7" type="link" linked-workflow-id="f433f59b-d77d-42c8-9490-29f247b01b36">
+    <display-name><![CDATA[Pick Target FlashArray from Pure1]]></display-name>
+    <in-binding>
+      <bind name="analysisPeriod" type="string" export-name="analysisPeriod"></bind>
+      <bind name="aggregation" type="string" export-name="aggregation"></bind>
+      <bind name="advancedOptions" type="boolean" export-name="advancedOptions"></bind>
+      <bind name="flashArrays" type="Array/PS:FlashArrayConnection" export-name="flashArrays"></bind>
+      <bind name="capacityThreshold" type="number" export-name="capacityThreshold"></bind>
+      <bind name="finalCapacityThreshold" type="number" export-name="finalCapacityThreshold"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="flasharrayConnection" type="PS:FlashArrayConnection" export-name="optimalFlashArray"></bind>
+    </out-binding>
+    <description><![CDATA[Returns the percent total busy of a specified FlashArray over a given time (default maximum value over 30 days).
+
+This window can be changed to 1 day or 1 week as well as average instead of maximum.]]></description>
+    <position y="128.13636363636363" x="264.5"></position>
+  </workflow-item>
+  <workflow-item name="item7" out-name="item8" type="task">
+    <display-name><![CDATA[Single FlashArray]]></display-name>
+    <script encoded="false"><![CDATA[for (var datastoreCount = 0;datastoreCount < vvolDatastores.length; datastoreCount++)
+{
+	var flashArray = System.getModule("com.purestorage.flasharray.vvol.storagecontainer").getFlashArrayConnectionofVVolDatastore(vvolDatastores[datastoreCount]);
+	System.log(flashArray.name);
+	if (flashArray.name == optimalFlashArray.name)
+	{
+		if (bestDatastore == null)
+		{
+			var bestDatastore = vvolDatastores[datastoreCount];
+		}
+		else
+		{
+			if (bestDatastore.freeSpace <  vvolDatastores[datastoreCount])
+			{
+				bestDatastore = vvolDatastores[datastoreCount];
+			}
+		}
+	}
+}
+System.log("The best datastore is called " + bestDatastore.name +  " on FlashArray " + optimalFlashArray.name);]]></script>
+    <in-binding>
+      <bind name="flashArrays" type="Array/PS:FlashArrayConnection" export-name="flashArrays"></bind>
+      <bind name="vvolDatastores" type="Array/VC:Datastore" export-name="vvolDatastores"></bind>
+      <bind name="optimalFlashArray" type="PS:FlashArrayConnection" export-name="optimalFlashArray"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="optimalFlashArray" type="PS:FlashArrayConnection" export-name="optimalFlashArray"></bind>
+      <bind name="bestDatastore" type="VC:Datastore" export-name="bestDatastore"></bind>
+    </out-binding>
+    <position y="128.13636363636363" x="404.5"></position>
+  </workflow-item>
+  <workflow-item name="item8" type="end" end-mode="0">
+    <position y="118.13636363636363" x="584.5"></position>
+  </workflow-item>
+  <workflow-item name="item9" out-name="item2" type="task">
+    <display-name><![CDATA[Gather datastores]]></display-name>
+    <script encoded="false"><![CDATA[if (cluster != null)
+{
+	vvolDatastores = [];
+	for (var dsCount = 0; dsCount < cluster.datastore.length; dsCount++)
+	{
+		if (cluster.datastore[dsCount].summary.type == "VVOL")
+		{
+			if (cluster.datastore[dsCount].info.vvolDS.storageArray[0].vendorId == "PURE")
+			{
+				vvolDatastores.push(cluster.datastore[dsCount]);
+			}
+			else
+			{
+				System.warn("Found a non-Pure Storage VVol datastore called " + cluster.datastore[dsCount].name + ". Skipping it...");
+			}
+		}
+		else
+		{
+			System.warn("Found a non-VVol datastore called " + cluster.datastore[dsCount].name + ". Skipping it...");
+		}
+	}
+}
+else
+{
+	vvolDatastores = inputVVolDatastores;
+}]]></script>
+    <in-binding>
+      <bind name="inputVVolDatastores" type="Array/VC:Datastore" export-name="inputVvolDatastores"></bind>
+      <bind name="cluster" type="VC:ClusterComputeResource" export-name="cluster"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="vvolDatastores" type="Array/VC:Datastore" export-name="vvolDatastores"></bind>
+    </out-binding>
+    <position y="19.045454545454543" x="124.5"></position>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item4" type="task" script-module="com.purestorage.flasharray.vvol.storagecontainer/getFlashArrayConnectionofVVolDatastore">
+    <display-name><![CDATA[getFlashArrayConnectionofVVolDatastore]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.purestorage.flasharray.vvol.storagecontainer").getFlashArrayConnectionofVVolDatastore(vvolDatastore) ;]]></script>
+    <in-binding>
+      <bind name="vvolDatastore" type="VC:Datastore" export-name="datastore"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="PS:FlashArrayConnection" export-name="faConnection"></bind>
+    </out-binding>
+    <description><![CDATA[Takes in a FlashArray VVol datastore and returns a matching FlashArray connection if one is found.]]></description>
+    <position y="19.045454545454543" x="405.0"></position>
+  </workflow-item>
+  <presentation>
+    <p-step>
+      <title><![CDATA[Environment]]></title>
+      <p-group>
+        <title><![CDATA[Datastore Choice]]></title>
+        <p-param name="typeChoice">
+          <desc><![CDATA[Datastore selection type]]></desc>
+          <p-qual kind="static" name="genericEnumeration" type="Array/string"><![CDATA[#{#string#Compute Cluster#;#string#Manual Selection#}#]]></p-qual>
+          <p-qual kind="static" name="defaultValue" type="string"><![CDATA[Compute Cluster]]></p-qual>
+        </p-param>
+        <p-param name="cluster">
+          <desc><![CDATA[Choose a compute cluster]]></desc>
+          <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#typeChoice == "Compute Cluster"]]></p-qual>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+        </p-param>
+        <p-param name="inputVvolDatastores">
+          <desc><![CDATA[Choose specific datastores]]></desc>
+          <p-qual kind="ognl" name="ognlValidator" type="String"><![CDATA[GetAction("com.purestorage.pure1.helper","findPureVVolDatastores").call( #inputVvolDatastores )]]></p-qual>
+          <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#typeChoice == "Manual Selection"]]></p-qual>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+        </p-param>
+      </p-group>
+      <p-group>
+        <title><![CDATA[Advanced Options]]></title>
+        <p-param name="advancedOptions">
+          <desc><![CDATA[Customize analysis window?]]></desc>
+          <p-qual kind="static" name="defaultValue" type="boolean"><![CDATA[Last month]]></p-qual>
+        </p-param>
+        <p-param name="analysisPeriod">
+          <desc><![CDATA[How long of a sample period should be examined?]]></desc>
+          <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#advancedOptions]]></p-qual>
+          <p-qual kind="static" name="genericEnumeration" type="Array/string"><![CDATA[#{#string#Last month#;#string#Last week#;#string#Last day#}#]]></p-qual>
+          <p-qual kind="static" name="defaultValue" type="string"><![CDATA[Last month]]></p-qual>
+        </p-param>
+        <p-param name="aggregation">
+          <desc><![CDATA[Maximum or Average (max recommended)]]></desc>
+          <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#advancedOptions]]></p-qual>
+          <p-qual kind="static" name="genericEnumeration" type="Array/string"><![CDATA[#{#string#Maximum#;#string#Average#}#]]></p-qual>
+          <p-qual kind="static" name="defaultValue" type="string"><![CDATA[Maximum]]></p-qual>
+        </p-param>
+        <p-param name="capacityThreshold">
+          <desc><![CDATA[Specify a percent full for process to favor less full arrays over less busy.]]></desc>
+          <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#advancedOptions]]></p-qual>
+          <p-qual kind="static" name="defaultValue" type="number"><![CDATA[0.75]]></p-qual>
+          <p-qual kind="static" name="numberFormat" type="String"><![CDATA[0.#######]]></p-qual>
+        </p-param>
+        <p-param name="finalCapacityThreshold">
+          <desc><![CDATA[Specify percent full that is not to be exceeeded. Process will fail if all arrays are more than this full.]]></desc>
+          <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#advancedOptions]]></p-qual>
+          <p-qual kind="static" name="defaultValue" type="number"><![CDATA[0.9]]></p-qual>
+          <p-qual kind="static" name="numberFormat" type="String"><![CDATA[0.######]]></p-qual>
+          <p-qual kind="ognl" name="minNumberValue" type="Number"><![CDATA[#capacityThreshold]]></p-qual>
+        </p-param>
+      </p-group>
+    </p-step>
+  </presentation>
+</workflow>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item2" object-name="workflow:name=generic" id="fff0ac2f-aaa5-4fb7-b053-e5bdf10b9456" version="1.0.0" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Tag One or More FlashArrays in Pure1]]></display-name>
+  <description><![CDATA[Creates a new tag for each specified array(s) or if it already exists, updates it to the new value.]]></description>
+  <position y="50.0" x="100.0"></position>
+  <input>
+    <param name="flasharray" type="Array/PS:FlashArrayConnection"></param>
+    <param name="keyName" type="string"></param>
+    <param name="keyValue" type="string"></param>
+  </input>
+  <attrib name="pureOneToken" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="restHost" type="REST:RESTHost" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="pureOneConnection" type="ConfigurationElement" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="tags" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="45.40909090909091" x="684.5"></position>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item1" type="task" script-module="com.purestorage.pure1.connection/pure1AuthenticateSession">
+    <display-name><![CDATA[pure1AuthenticateSession]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.purestorage.pure1.connection").pure1AuthenticateSession(restHost,pureOneConnection) ;]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="pureOneConnection" type="ConfigurationElement" export-name="pureOneConnection"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="pureOneToken"></bind>
+    </out-binding>
+    <description><![CDATA[Returns access token from default configuration element or specified element. No inputs required by default.]]></description>
+    <position y="55.40909090909091" x="204.5"></position>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.purestorage.pure1.tags/tagFlashArrayinPure1">
+    <display-name><![CDATA[tagFlashArrayinPure1]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.purestorage.pure1.tags").tagFlashArrayinPure1(restHost,pureOneToken,flasharray,keyName,keyValue) ;]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="pureOneToken" type="string" export-name="pureOneToken"></bind>
+      <bind name="flasharray" type="Array/PS:FlashArrayConnection" export-name="flasharray"></bind>
+      <bind name="keyName" type="string" export-name="keyName"></bind>
+      <bind name="keyValue" type="string" export-name="keyValue"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="tags"></bind>
+    </out-binding>
+    <description><![CDATA[Returns the tags of the specified FlashArray from Pure1.]]></description>
+    <position y="55.90909090909091" x="425.0"></position>
+  </workflow-item>
+  <presentation>
+    <p-param name="flasharray">
+      <desc><![CDATA[Enter in one or more FlashArray connections]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+    <p-param name="keyName">
+      <desc><![CDATA[Enter in a key name]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+    <p-param name="keyValue">
+      <desc><![CDATA[Enter in a key value]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+  </presentation>
+</workflow>

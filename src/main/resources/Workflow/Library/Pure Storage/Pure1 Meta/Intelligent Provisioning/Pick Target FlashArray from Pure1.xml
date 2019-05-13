@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item2" object-name="workflow:name=generic" id="f433f59b-d77d-42c8-9490-29f247b01b36" version="1.0.2" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Pick Target FlashArray from Pure1]]></display-name>
+  <description><![CDATA[Returns the percent total busy of a specified FlashArray over a given time (default maximum value over 30 days).
+
+This window can be changed to 1 day or 1 week as well as average instead of maximum.]]></description>
+  <position y="9.545454545454543" x="25.0"></position>
+  <input>
+    <param name="analysisPeriod" type="string"></param>
+    <param name="aggregation" type="string"></param>
+    <param name="advancedOptions" type="boolean"></param>
+    <param name="flashArrays" type="Array/PS:FlashArrayConnection"></param>
+    <param name="capacityThreshold" type="number"></param>
+    <param name="finalCapacityThreshold" type="number"></param>
+  </input>
+  <output>
+    <param name="flasharrayConnection" type="PS:FlashArrayConnection"></param>
+  </output>
+  <attrib name="restHost" type="REST:RESTHost" read-only="false"></attrib>
+  <attrib name="pureOneConnection" type="ConfigurationElement" read-only="false"></attrib>
+  <attrib name="pureOneToken" type="string" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="analysisPeriodDays" type="number" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="busyMeter" type="number" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="aggAbrev" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="arrayNames" type="Array/string" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="arrayName" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="busyMeters" type="Array/number" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="arrayCount" type="number" read-only="false">
+    <value encoded="n"><![CDATA[0.0]]></value>
+    <description><![CDATA[counter to increment]]></description>
+  </attrib>
+  <attrib name="faConnections" type="Array/PS:FlashArray" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="faConnectionList" type="Array/PS:FlashArrayConnection" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="officialFinalCapacityThreshold" type="number" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="officialCapacityThreshold" type="number" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="136.3181818181818" x="324.5"></position>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item3" type="task" script-module="com.purestorage.pure1.connection/pure1AuthenticateSession">
+    <display-name><![CDATA[pure1AuthenticateSession]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.purestorage.pure1.connection").pure1AuthenticateSession(restHost,pureOneConnection) ;]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="pureOneConnection" type="ConfigurationElement" export-name="pureOneConnection"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="pureOneToken"></bind>
+    </out-binding>
+    <description><![CDATA[Returns access token from default configuration element or specified element. No inputs required by default.]]></description>
+    <position y="82.68181818181817" x="0.0"></position>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item1" type="task">
+    <display-name><![CDATA[Calculate Window]]></display-name>
+    <script encoded="false"><![CDATA[if (analysisPeriod == "Last day")
+{
+	analysisPeriodDays = 1;
+}
+else if (analysisPeriod == "Last week")
+{
+	analysisPeriodDays = 7;
+}
+else if (analysisPeriod == "Last month")
+{
+	analysisPeriodDays = 30;
+}
+else
+{
+	System.debug("No analysis period configured, defaulting to 30 days");
+	analysisPeriodDays = 30;
+}
+if (aggregation == "Maximum")
+{
+	aggAbrev = "max";
+}
+else if (aggregation == "Average")
+{
+	aggAbrev = "avg";
+}
+else
+{
+	System.debug("No aggregation specified, defaulting to maximum");
+	aggAbrev = "max";
+}
+if (flashArrays == null)
+{
+	flashArrays = PSFlashArrayConnectionManager.getFlashArrayConnections();
+}
+var faConnections = [];
+arrayNames = [];
+for each (var flasharray in flashArrays)
+{
+	arrayNames.push(PSFlashArrayManager.getFlashArray(flasharray).name);
+	faConnections.push(PSFlashArrayManager.getFlashArray(flasharray));
+}
+arrayName = arrayNames[0];
+faConnectionList = flashArrays;
+if (capacityThreshold == null)
+{
+	System.debug("No capacity threshold specified, defaulting to 75% full");
+	var officialCapacityThreshold = .75;
+}
+else
+{
+	var officialCapacityThreshold = capacityThreshold;
+}
+if (finalCapacityThreshold == null)
+{
+	System.debug("No to-not-exceeed capacity threshold specified, defaulting to 90% full");
+	var officialFinalCapacityThreshold = .90;
+}
+else
+{
+	var officialFinalCapacityThreshold = finalCapacityThreshold;
+}
+]]></script>
+    <in-binding>
+      <bind name="analysisPeriod" type="string" export-name="analysisPeriod"></bind>
+      <bind name="aggregation" type="string" export-name="aggregation"></bind>
+      <bind name="flashArrays" type="Array/PS:FlashArrayConnection" export-name="flashArrays"></bind>
+      <bind name="capacityThreshold" type="number" export-name="capacityThreshold"></bind>
+      <bind name="finalCapacityThreshold" type="number" export-name="finalCapacityThreshold"></bind>
+      <bind name="officialFinalCapacityThreshold" type="number" export-name="officialFinalCapacityThreshold"></bind>
+      <bind name="officialCapacityThreshold" type="number" export-name="officialCapacityThreshold"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="analysisPeriodDays" type="number" export-name="analysisPeriodDays"></bind>
+      <bind name="aggAbrev" type="string" export-name="aggAbrev"></bind>
+      <bind name="arrayNames" type="Array/string" export-name="arrayNames"></bind>
+      <bind name="arrayName" type="string" export-name="arrayName"></bind>
+      <bind name="faConnections" type="Array/PS:FlashArray" export-name="faConnections"></bind>
+      <bind name="faConnectionList" type="Array/PS:FlashArrayConnection" export-name="faConnectionList"></bind>
+      <bind name="officialCapacityThreshold" type="number" export-name="officialCapacityThreshold"></bind>
+      <bind name="officialFinalCapacityThreshold" type="number" export-name="officialFinalCapacityThreshold"></bind>
+    </out-binding>
+    <position y="82.68181818181817" x="124.5"></position>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item4" type="task" script-module="com.purestorage.pure1.arrays/getPure1ArrayBusyMeter">
+    <display-name><![CDATA[getPure1ArrayBusyMeter]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.purestorage.pure1.arrays").getPure1ArrayBusyMeter(restHost,pureOneToken,analysisPeriodDays,aggregation,arrayName) ;]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="pureOneToken" type="string" export-name="pureOneToken"></bind>
+      <bind name="analysisPeriodDays" type="number" export-name="analysisPeriodDays"></bind>
+      <bind name="aggregation" type="string" export-name="aggAbrev"></bind>
+      <bind name="arrayName" type="string" export-name="arrayName"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="number" export-name="busyMeter"></bind>
+    </out-binding>
+    <description><![CDATA[Return the array busy meter metric for a specified period. Average or maximum.]]></description>
+    <position y="19.045454545454543" x="125.0"></position>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item5" type="task">
+    <display-name><![CDATA[Return Busy Meter]]></display-name>
+    <script encoded="false"><![CDATA[if (busyMeters == null)
+{
+	var busyMeters = [];
+}
+busyMeters.push(busyMeter);
+System.log(arrayName + "'s " + aggAbrev + " busy percentage over the last " + analysisPeriodDays + " days is " + Math.round((busyMeter * 100)) + "%");]]></script>
+    <in-binding>
+      <bind name="busyMeter" type="number" export-name="busyMeter"></bind>
+      <bind name="arrayName" type="string" export-name="arrayName"></bind>
+      <bind name="aggAbrev" type="string" export-name="aggAbrev"></bind>
+      <bind name="analysisPeriodDays" type="number" export-name="analysisPeriodDays"></bind>
+      <bind name="busyMeters" type="Array/number" export-name="busyMeters"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="busyMeters" type="Array/number" export-name="busyMeters"></bind>
+    </out-binding>
+    <position y="19.045454545454543" x="284.5"></position>
+  </workflow-item>
+  <workflow-item name="item5" prototype-id="increase-counter" out-name="item6" content-mode="x" type="task">
+    <display-name><![CDATA[Increase counter]]></display-name>
+    <script encoded="false"><![CDATA[//Auto-generated script
+counter = counter+1;]]></script>
+    <in-binding>
+      <bind name="counter" type="number" export-name="arrayCount">
+        <description><![CDATA[counter to increment]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="counter" type="number" export-name="arrayCount">
+        <description><![CDATA[counter incremented]]></description>
+      </bind>
+    </out-binding>
+    <description><![CDATA[Increment a counter by one]]></description>
+    <position y="19.045454545454543" x="424.5"></position>
+  </workflow-item>
+  <workflow-item name="item6" out-name="item7" type="custom-condition" alt-out-name="item8">
+    <display-name><![CDATA[Custom decision]]></display-name>
+    <script encoded="false"><![CDATA[if (arrayNames.length == arrayCount)
+{
+	return true;
+}
+else
+{
+	return false;
+}]]></script>
+    <in-binding>
+      <bind name="arrayCount" type="number" export-name="arrayCount"></bind>
+      <bind name="arrayNames" type="Array/string" export-name="arrayNames"></bind>
+    </in-binding>
+    <position y="72.68181818181817" x="424.5"></position>
+  </workflow-item>
+  <workflow-item name="item8" out-name="item1" type="task">
+    <display-name><![CDATA[Iterate array]]></display-name>
+    <script encoded="false"><![CDATA[arrayName = arrayNames[arrayCount];]]></script>
+    <in-binding>
+      <bind name="arrayNames" type="Array/string" export-name="arrayNames"></bind>
+      <bind name="arrayCount" type="number" export-name="arrayCount">
+        <description><![CDATA[counter to increment]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="arrayName" type="string" export-name="arrayName"></bind>
+    </out-binding>
+    <position y="82.68181818181817" x="265.0"></position>
+  </workflow-item>
+  <workflow-item name="item7" out-name="item0" type="task">
+    <display-name><![CDATA[Identify Least Busy]]></display-name>
+    <script encoded="false"><![CDATA[var arraysWithMeters = []
+for (var h =0;h <busyMeters.length;h++) {
+	var capacityInfo = System.getModule("com.purestorage.flasharray.restapi").runAPI(faConnections[h],"GET","","/array?space=true");
+	capacityInfo = JSON.parse(capacityInfo);
+	var percentUsed = capacityInfo[0].total / capacityInfo[0].capacity;
+	System.debug("Array name: " + faConnections[h].name + " Percent full: " + Math.round(percentUsed *100) + " Percent busy: " + Math.round(busyMeters[h]*100) );
+	arraysWithMeters[h] = {
+	name: faConnections[h],
+	busyness: busyMeters[h],
+	faConn: faConnectionList[h],
+	percentFull: percentUsed
+	}
+}
+var lowest = {
+	name: null,
+	busyness: 100.0,
+	faConn: null,
+	percentFull: null
+}
+var fallbackLowest = {
+	name: null,
+	busyness: 100.0,
+	faConn: null,
+	percentFull: null
+}
+
+for (var i = 0; i < arraysWithMeters.length; i++) {
+	var currentArray = arraysWithMeters[i]
+	if (currentArray.busyness <= lowest.busyness && currentArray.percentFull < capacityThreshold) {
+		System.debug(JSON.stringify(currentArray) + " is replacing the current lowest " + JSON.stringify(lowest));
+		lowest = currentArray
+	} else {
+		if (currentArray.busyness <= lowest.busyness && currentArray.percentFull < finalCapacityThreshold) {
+		System.debug(JSON.stringify(currentArray) + " is replacing the current fallback lowest " + JSON.stringify(fallbackLowest));
+		fallBackLowest = currentArray
+		}
+	}
+}
+if (lowest.name != null) {
+	flasharrayConnection = lowest.faConn
+	System.log("Selected FlashArray " + lowest.faConn.name + " is " + Math.round(lowest.percentFull*100) + "% full and " + Math.round(lowest.busyness*100) + "% busy");
+}else {
+	if (fallbackLowest.name != null) {
+		flasharrayConnection = fallbackLowest.faConn
+		System.log("Selected FlashArray " + fallbackLowest.faConn.name + " is " + Math.round(fallbackLowest.percentFull *100) + "% full and " + Math.round(fallbackLowest.busyness*100) + "% busy");
+	}
+}]]></script>
+    <in-binding>
+      <bind name="busyMeters" type="Array/number" export-name="busyMeters"></bind>
+      <bind name="faConnections" type="Array/PS:FlashArray" export-name="faConnections"></bind>
+      <bind name="capacityThreshold" type="number" export-name="officialCapacityThreshold"></bind>
+      <bind name="faConnectionList" type="Array/PS:FlashArrayConnection" export-name="faConnectionList"></bind>
+      <bind name="finalCapacityThreshold" type="number" export-name="officialFinalCapacityThreshold"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="flasharrayConnection" type="PS:FlashArrayConnection" export-name="flasharrayConnection"></bind>
+    </out-binding>
+    <position y="146.3181818181818" x="425.0"></position>
+  </workflow-item>
+  <presentation>
+    <p-param name="flashArrays">
+      <desc><![CDATA[Choose FlashArrays (if none are selected, all arrays will be examined)]]></desc>
+    </p-param>
+    <p-param name="advancedOptions">
+      <desc><![CDATA[Customize analysis window?]]></desc>
+      <p-qual kind="static" name="defaultValue" type="boolean"><![CDATA[__NULL__]]></p-qual>
+    </p-param>
+    <p-param name="analysisPeriod">
+      <desc><![CDATA[Choose the analysis period:]]></desc>
+      <p-qual kind="static" name="genericEnumeration" type="Array/string"><![CDATA[#{#string#Last month#;#string#Last week#;#string#Last day#}#]]></p-qual>
+      <p-qual kind="static" name="defaultValue" type="string"><![CDATA[Last month]]></p-qual>
+      <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#advancedOptions]]></p-qual>
+    </p-param>
+    <p-param name="aggregation">
+      <desc><![CDATA[Calculate the average or maximum?]]></desc>
+      <p-qual kind="static" name="genericEnumeration" type="Array/string"><![CDATA[#{#string#Maximum#;#string#Average#}#]]></p-qual>
+      <p-qual kind="static" name="defaultValue" type="string"><![CDATA[Maximum]]></p-qual>
+      <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#advancedOptions]]></p-qual>
+    </p-param>
+    <p-param name="capacityThreshold">
+      <desc><![CDATA[Enter a percentage capacity full (between 0 and 1) you would like to have the workflow look for less full alternatives by looking at next less busy arrays]]></desc>
+      <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#advancedOptions]]></p-qual>
+      <p-qual kind="static" name="defaultValue" type="number"><![CDATA[0.75]]></p-qual>
+      <p-qual kind="static" name="numberFormat" type="String"><![CDATA[0.#######]]></p-qual>
+    </p-param>
+    <p-param name="finalCapacityThreshold">
+      <desc><![CDATA[Enter a percentage capacity full (between 0 and 1) you would like to have the workflow never provision from]]></desc>
+      <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#advancedOptions]]></p-qual>
+      <p-qual kind="static" name="defaultValue" type="number"><![CDATA[0.9]]></p-qual>
+      <p-qual kind="static" name="numberFormat" type="String"><![CDATA[0.######]]></p-qual>
+      <p-qual kind="ognl" name="minNumberValue" type="Number"><![CDATA[#capacityThreshold]]></p-qual>
+    </p-param>
+  </presentation>
+</workflow>

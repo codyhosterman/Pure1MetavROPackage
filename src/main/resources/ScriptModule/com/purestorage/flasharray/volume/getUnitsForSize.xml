@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="getUnitsForSize" result-type="Array/string" api-version="6.0.0" id="8be159f3-d84b-4c5e-9509-e9c6986c81bc" version="2.1.1" allowed-operations="vef">
+  <script encoded="false"><![CDATA[var units = new Array();
+units.push("KB");
+units.push("MB");
+units.push("GB");
+units.push("TB");
+units.push("PB");
+
+return units;]]></script>
+</dunes-script-module>

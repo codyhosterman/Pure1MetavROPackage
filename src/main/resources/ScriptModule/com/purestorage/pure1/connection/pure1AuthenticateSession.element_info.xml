@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">com.purestorage.pure1.connection</entry>
+<entry key="categoryPathEscaped">Y29t.cHVyZXN0b3JhZ2U=.cHVyZTE=.Y29ubmVjdGlvbg==</entry>
+<entry key="name">pure1AuthenticateSession</entry>
+<entry key="type">ScriptModule</entry>
+<entry key="id">420b0d49-45c3-4f40-8b8a-3cc44bae1b8f</entry>
+</properties>

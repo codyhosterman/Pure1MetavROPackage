@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">com.purestorage.flasharray.volume</entry>
+<entry key="categoryPathEscaped">Y29t.cHVyZXN0b3JhZ2U=.Zmxhc2hhcnJheQ==.dm9sdW1l</entry>
+<entry key="name">eradicateVolumeByName</entry>
+<entry key="type">ScriptModule</entry>
+<entry key="id">2d3d9596-5abc-4cac-a40f-9c0cf29f9248</entry>
+</properties>

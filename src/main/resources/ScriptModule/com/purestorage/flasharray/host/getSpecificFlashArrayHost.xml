@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="getSpecificFlashArrayHost" result-type="PS:Host" api-version="6.0.0" id="a3cfd8e1-8fbf-43cb-ae51-fdf50834f30e" version="2.1.0" allowed-operations="vef">
+  <description><![CDATA[Get specific FlashArray host.]]></description>
+  <param n="hostName" t="string"><![CDATA[Host Name]]></param>
+  <param n="flashArrayConnection" t="PS:FlashArrayConnection"><![CDATA[FlashArray Connection]]></param>
+  <script encoded="false"><![CDATA[if(!flashArrayConnection) {
+	var errorMessage = "FlashArray Connection object should not be empty!";
+	System.error(errorMessage);
+	throw errorMessage;
+}
+if(!hostName) {
+	var errorMessage = "Host Name is required!";
+	System.error(errorMessage);
+	throw errorMessage;
+}
+
+System.debug("Input Parameter:" + " Host Name:" + hostName + ", FlashArray Connection: " + flashArrayConnection);
+
+var restSession = PSSessionManager.getSession(flashArrayConnection);
+var hostObject = PSHostManager.getHost(hostName, restSession);
+
+System.log("Retrieved the details of flasharray host object \"" + hostName + "\" successfully!");
+System.debug("Retured specific FlashArray Host object: " + hostObject);
+
+return hostObject;]]></script>
+</dunes-script-module>

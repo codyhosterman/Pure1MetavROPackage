@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="createNewVolume" result-type="PS:Volume" api-version="6.0.0" id="b60bf207-6333-4207-8f4e-1df044dc99c8" version="2.1.0" allowed-operations="vef">
+  <description><![CDATA[Creates new volume]]></description>
+  <param n="name" t="string"><![CDATA[Volume Name (Only Alphabets, Numbers,_ and - are allowed)]]></param>
+  <param n="size" t="string"><![CDATA[Provisioned Size (size in numbers followed by any one of [K|M|G|T|P] character)]]></param>
+  <param n="flashArrayConnection" t="PS:FlashArrayConnection"><![CDATA[FlashArray Connection]]></param>
+  <script encoded="false"><![CDATA[if(!flashArrayConnection) {
+	System.error("FlashArray Connection object is null");
+	return null;
+}
+if(!name || !size) {
+	System.error("Name and Size are required!");
+	throw "Name and Size are required!";
+}
+
+var restSession = PSSessionManager.getSession(flashArrayConnection);
+var result = PSVolumeManager.createNewVolume(name,size,restSession);
+System.debug("Volume object created: " + result);
+System.log("Volume object \""+ result.name + "\" created successfully!");
+return result;]]></script>
+</dunes-script-module>

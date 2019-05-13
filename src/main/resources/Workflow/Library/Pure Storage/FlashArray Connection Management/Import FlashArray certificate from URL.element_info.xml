@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">Library.Pure Storage.FlashArray Connection Management</entry>
+<entry key="categoryPathEscaped">TGlicmFyeQ==.UHVyZSBTdG9yYWdl.Rmxhc2hBcnJheSBDb25uZWN0aW9uIE1hbmFnZW1lbnQ=</entry>
+<entry key="name">Import FlashArray certificate from URL</entry>
+<entry key="type">Workflow</entry>
+<entry key="id">122b48a9-3cf0-4a07-8db8-4f15421b5b8c</entry>
+</properties>

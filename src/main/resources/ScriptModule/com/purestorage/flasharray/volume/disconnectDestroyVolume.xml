@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="disconnectDestroyVolume" result-type="string" api-version="6.0.0" id="9bd2c68d-2f79-4d45-893d-1a060fa691c8" version="2.1.0" allowed-operations="vef">
+  <description><![CDATA[Disconnects volume if it connected to host or host groups. After disconnecting it destroys volume.]]></description>
+  <param n="volume" t="PS:Volume"><![CDATA[Volume to disconnect and destroy]]></param>
+  <param n="eradicate" t="boolean"><![CDATA[If set to true, Eradicates Volume]]></param>
+  <script encoded="false"><![CDATA[
+ if(!volume) throw "Volume must not be null!";
+
+ var restSession = volume.getSession();
+ var volumeName = volume.name; 
+ //First break connections if any
+ breakConnections(volumeName);
+ 
+// delete volume
+ var result = volume.removeVolume();
+ System.debug("Delete volume: " + result);
+ System.log("Volume \"" + volumeName + "\" deleted successfully");
+
+ if(eradicate){
+ 	System.debug("Eradicating volume: " + volumeName);
+	PSVolumeManager.eradicateVolume(volumeName,restSession);
+	 System.log("Volume \"" + volumeName + "\" eradicated successfully");
+ }
+ return volumeName;
+
+/*-------------------------- Break Connections ------------*/
+function breakConnections(volumeName){
+
+	 var privateConnsURI = "/volume/" + volumeName + "/host";
+	 var sharedConnsURI = "/volume/" + volumeName + "/hgroup";
+	
+	 var privateConns = PSFlashArrayManager.runAPI(privateConnsURI, null, "GET", restSession);
+	 System.debug("Volume: " + volumeName + " has Private Connections "+ privateConns);
+	
+	 var sharedConns = PSFlashArrayManager.runAPI(sharedConnsURI, null, "GET", restSession);
+	 System.debug("Volume: " + volumeName + " has Shared Connections "+ sharedConns);
+	 
+	 var privateConnsList = JSON.parse(privateConns);
+	 // parse shared connections
+	 var sharedConnList = JSON.parse(sharedConns);
+	
+	 var hosts = new Properties();
+	 var hgroups = new Properties(); 
+	
+	 if(privateConnsList.length > 0) {
+		for(var index = 0; index < privateConnsList.length ; index++){
+			hosts.put(privateConnsList[index].host, privateConnsList[index].name);
+		}
+	 }
+	 if(sharedConnList.length > 0) {
+		for(var index = 0; index < sharedConnList.length ; index++){
+			hgroups.put(sharedConnList[index].hgroup, sharedConnList[index].name);
+		}
+	 }
+	
+	//First break connection from hosts
+	 for each (host in hosts.keys){
+		var hostDisconnectURI = "/host/" + host + "/volume/" + volumeName;
+		System.debug("Volume break connection from host uri: " + hostDisconnectURI);
+		PSFlashArrayManager.runAPI(hostDisconnectURI, null, "DELETE", restSession);
+	 }
+	
+	//First break connection from hgroups
+	 for each (hgroup in hgroups.keys){
+		var hgroupDisconnectURI = "/hgroup/" + hgroup + "/volume/" + volumeName;
+		System.debug("Volume break connection from host group uri: " + hgroupDisconnectURI);
+		PSFlashArrayManager.runAPI(hgroupDisconnectURI, null, "DELETE", restSession);
+	 }
+	
+ return true;
+}]]></script>
+</dunes-script-module>

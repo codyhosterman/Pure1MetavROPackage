@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="eradicateVolumeByName" result-type="string" api-version="6.0.0" id="2d3d9596-5abc-4cac-a40f-9c0cf29f9248" version="2.1.0" allowed-operations="vef">
+  <description><![CDATA[Eradicates volume]]></description>
+  <param n="volumeName" t="string"><![CDATA[Volume Name]]></param>
+  <param n="flashArrayConnection" t="PS:FlashArrayConnection"><![CDATA[FlashArray Connection]]></param>
+  <script encoded="false"><![CDATA[System.log("Eradicating the volume : "+ volumeName);
+if(!flashArrayConnection) {
+	System.error("FlashArray Connection object is null");
+	return null;
+}
+if(!volumeName) {
+	System.error("Volume Name is required!");
+	throw "Volume Name is required!";
+}
+
+var restSession = PSSessionManager.getSession(flashArrayConnection);
+var result = PSVolumeManager.eradicateVolume(volumeName,restSession);
+
+System.debug("Volume object eradicated: " + result);
+System.log("Volume object \""+ volumeName + "\" eradicated successfully!");
+if(result!=null)
+	return result.name;
+return null;
+]]></script>
+</dunes-script-module>

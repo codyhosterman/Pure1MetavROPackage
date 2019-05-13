@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="validateFlashArrayConnection" result-type="boolean" api-version="6.0.0" id="f3f4c532-f5da-41e6-99b3-14b543ad2e46" version="2.1.0" allowed-operations="vef">
+  <description><![CDATA[Validate a FlashArray Connection.]]></description>
+  <param n="name" t="string"><![CDATA[Name of this connection (e.g. Pure-01)]]></param>
+  <param n="baseUrl" t="string"><![CDATA[FlashArray Base URL (e.g. https://pure-001.example.com)]]></param>
+  <param n="apiVersion" t="string"><![CDATA[Api Version]]></param>
+  <param n="username" t="string"><![CDATA[FlashArray User Name]]></param>
+  <param n="password" t="SecureString"><![CDATA[FlashArray Password]]></param>
+  <param n="autoPopulateApiVersions" t="boolean"><![CDATA[Auto Populate API Versions]]></param>
+  <script encoded="false"><![CDATA[
+if(!name || !baseUrl) 
+	throw "Name or Url parameter shoud not be empty.";
+
+if(autoPopulateApiVersions){
+	//check if base url contains api
+	if(baseUrl.indexOf("/api") != -1){
+		throw "Invalid FlashArray base URL. Provide correct URL(e.g. https://pure-001.example.com)";
+	}
+
+	if(!apiVersion)
+		throw "API Version shoud not be empty.";
+		
+	if(baseUrl.charAt(baseUrl.length-1) == '/'){
+		baseUrl = baseUrl + "api/" + apiVersion;
+	}
+	else{
+		baseUrl = baseUrl + "/api/" + apiVersion;
+	}
+}
+else{
+	if(baseUrl.indexOf("/api") == -1){
+		throw "Invalid FlashArray base URL. Provide correct URL(e.g. https://pure-001.example.com/api/<api_version>) or Select the API Version from dropdown list.";
+	}
+	
+	var apiGivenInUrl = baseUrl.substring(baseUrl.lastIndexOf("/")+1);
+	var urlWOApi = baseUrl.substring(0,baseUrl.lastIndexOf("/"));
+	
+	//var response = '{\"version\": [\"1.0\", \"1.1\", \"1.2\", \"1.3\", \"1.4\", \"1.5\", \"1.6\"]}';
+	var response = PSFlashArrayManager.getAllApiVersions(urlWOApi);
+	var obj = JSON.parse(response);
+	var supportedVersions = obj.version;
+
+	if(supportedVersions.indexOf(apiGivenInUrl)==-1)
+	{
+			throw "The given API Version in Base URL is not Supported by the Pure Storage FlashArray. The supported API versions are "+supportedVersions;
+	}
+}
+
+System.debug("baseUrl: "+baseUrl);
+var item = new PSFlashArrayConnection(name,baseUrl,username,password);
+
+//Try to connect with this connection
+try{
+	var testSession = PSSessionManager.getSession(item);
+	System.debug("FlashArray test Session  : " + testSession);
+	//if testSession is not null then connection is valid.
+	if(testSession){
+		return true;
+	}
+ }catch(e){
+	var msg = "Error : Provided FlashArray Connection details are not correct!";
+	System.log(msg);
+	System.debug(e);
+	}
+	
+return false;
+]]></script>
+</dunes-script-module>

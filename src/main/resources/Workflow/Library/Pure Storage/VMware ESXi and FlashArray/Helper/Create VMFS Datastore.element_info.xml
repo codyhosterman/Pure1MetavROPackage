@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">Library.Pure Storage.VMware ESXi and FlashArray.Helper</entry>
+<entry key="categoryPathEscaped">TGlicmFyeQ==.UHVyZSBTdG9yYWdl.Vk13YXJlIEVTWGkgYW5kIEZsYXNoQXJyYXk=.SGVscGVy</entry>
+<entry key="name">Create VMFS Datastore</entry>
+<entry key="type">Workflow</entry>
+<entry key="id">7b9957f4-8807-4103-9289-38bf34ef6b24</entry>
+</properties>

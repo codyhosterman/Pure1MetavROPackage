@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="listAvailableDisksForVMFS" result-type="Array/string" api-version="6.0.0" id="b854c430-6eca-46bd-b073-7c04c32c2390" version="0.1.0" allowed-operations="vef">
+  <description><![CDATA[Retrieves disk names that can be used to contain new VMFS datastores.
+This operation will filter out disks that are currently in use by an existing VMFS unless the VMFS using the disk is one being extended. It will also filter out management LUNs and disks that are referenced by RDMs.  These disk LUNs are also unsuited for use by a VMFS.
+Disk LUNs referenced by RDMs are found by examining all virtual machines known to the system and visiting their virtual disk backends.  If a virtual disk backend uses an RDM that is referencing a disk LUN, the disk LUN becomes ineligible for use by a VMFS datastore.]]></description>
+  <param n="host" t="VC:HostSystem"><![CDATA[The Virtual Center Host]]></param>
+  <script encoded="false"><![CDATA[var diskNames = [];
+
+if (host != null) {
+	var hostDatastoreSystem = VcPlugin.toManagedObject( host, host.configManager.datastoreSystem );
+	var hostScsiDisks = hostDatastoreSystem.queryAvailableDisksForVmfs(null);
+
+	for each (var disk in hostScsiDisks){
+		diskNames.push(disk.displayName);
+	}
+}
+return diskNames;]]></script>
+</dunes-script-module>

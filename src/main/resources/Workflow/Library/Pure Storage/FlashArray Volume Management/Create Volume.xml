@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item2" object-name="workflow:name=generic" id="7ea669b6-cb02-44bd-9739-d8556421554d" version="2.1.1" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Create Volume]]></display-name>
+  <description><![CDATA[Creates new volume]]></description>
+  <ref-types><![CDATA[>>(PS:FlashArrayConnection)]]></ref-types>
+  <position y="50.0" x="100.0"></position>
+  <input>
+    <param name="name" type="string">
+      <description><![CDATA[Volume Name (Only Alphabets, Numbers,_ and - are allowed)]]></description>
+    </param>
+    <param name="sizeInNumber" type="number">
+      <description><![CDATA[Provisioned Size in Number ]]></description>
+    </param>
+    <param name="flashArrayConnection" type="PS:FlashArrayConnection">
+      <description><![CDATA[FlashArray Connection]]></description>
+    </param>
+    <param name="unitForSize" type="string">
+      <description><![CDATA[Unit for Size]]></description>
+    </param>
+  </input>
+  <output>
+    <param name="actionResult" type="PS:Volume"></param>
+  </output>
+  <attrib name="size" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="45.40909090909091" x="664.5"></position>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item1" type="task">
+    <display-name><![CDATA[Validate Size]]></display-name>
+    <script encoded="false"><![CDATA[var units = System.getModule("com.purestorage.flasharray.volume").getUnitsForSize() ;
+
+if(units.indexOf(unitForSize) == -1)
+{
+	throw "Please provide valid unit for volume size."
+}
+
+size = sizeInNumber + unitForSize;
+System.debug("size: "+size);]]></script>
+    <in-binding>
+      <bind name="sizeInNumber" type="number" export-name="sizeInNumber">
+        <description><![CDATA[Provisioned Size in Number ]]></description>
+      </bind>
+      <bind name="unitForSize" type="string" export-name="unitForSize">
+        <description><![CDATA[Unit for Size]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="size" type="string" export-name="size"></bind>
+    </out-binding>
+    <description><![CDATA[sizeInNumber + Unit]]></description>
+    <position y="55.40909090909091" x="344.5"></position>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.purestorage.flasharray.volume/createNewVolume">
+    <display-name><![CDATA[createNewVolume]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.purestorage.flasharray.volume").createNewVolume(name,size,flashArrayConnection) ;]]></script>
+    <in-binding>
+      <bind name="name" type="string" export-name="name">
+        <description><![CDATA[Volume Name (Only Alphabets, Numbers,_ and - are allowed)]]></description>
+      </bind>
+      <bind name="size" type="string" export-name="size">
+        <description><![CDATA[Provisioned Size (size in numbers followed by any one of [K|M|G|T|P] character)]]></description>
+      </bind>
+      <bind name="flashArrayConnection" type="PS:FlashArrayConnection" export-name="flashArrayConnection">
+        <description><![CDATA[FlashArray Connection]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="PS:Volume" export-name="actionResult"></bind>
+    </out-binding>
+    <description><![CDATA[Creates new volume]]></description>
+    <position y="55.40909090909091" x="484.5"></position>
+  </workflow-item>
+  <presentation>
+    <p-step>
+      <title><![CDATA[Create Volume]]></title>
+      <p-group>
+        <title><![CDATA[Select FlashArray Connection]]></title>
+        <p-param name="flashArrayConnection">
+          <desc><![CDATA[FlashArray Connection]]></desc>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+          <p-qual name="contextualParameter" type="void"><![CDATA[__NULL__]]></p-qual>
+        </p-param>
+      </p-group>
+      <p-group>
+        <title><![CDATA[Volume Details]]></title>
+        <p-param name="name">
+          <desc><![CDATA[Volume Name (must be between 1 and 63 characters (alphanumeric, '_' and '-') in length and begin and end with a letter or number.)]]></desc>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+          <p-qual kind="static" name="minStringLength" type="Number"><![CDATA[1]]></p-qual>
+          <p-qual kind="static" name="maxStringLength" type="Number"><![CDATA[63]]></p-qual>
+          <p-qual kind="static" name="regexp" type="Regexp"><![CDATA[^[0-9A-Za-z]([-_]*[0-9A-Za-z]){0,62}$]]></p-qual>
+        </p-param>
+        <p-param name="sizeInNumber">
+          <desc><![CDATA[Volume Size (eg. 200 excluding unit character.)]]></desc>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+        </p-param>
+        <p-param name="unitForSize">
+          <desc><![CDATA[Unit]]></desc>
+          <p-qual kind="static" name="defaultValue" type="string"><![CDATA[TB]]></p-qual>
+          <p-qual kind="ognl" name="linkedEnumeration" type="Array/string"><![CDATA[GetAction("com.purestorage.flasharray.volume","getUnitsForSize").call()]]></p-qual>
+        </p-param>
+      </p-group>
+    </p-step>
+  </presentation>
+</workflow>

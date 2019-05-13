@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="getPure1RestHost" result-type="REST:RESTHost" api-version="6.0.0" id="a137e93b-fb1e-4b91-8472-13d10903627f" version="1.0.0" allowed-operations="vef">
+  <description><![CDATA[Finds default Pure1 REST host (named Pure1 Connection)]]></description>
+  <script encoded="false"><![CDATA[var restHostIds = RESTHostManager.getHosts();
+for (var i=0;i < restHostIds.length;i++)
+{
+	var restHostObj = RESTHostManager.getHost(restHostIds[i]);
+	System.debug("Looking at REST host " + restHostObj.name);
+	if (restHostObj.name == "Pure1 Connection")
+	{
+		return restHostObj;
+	}
+}
+throw "No default Pure1 REST host found. Either pass in a custom REST host or authenticate the default host."]]></script>
+</dunes-script-module>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">com.vmware.library.vc.storage</entry>
+<entry key="categoryPathEscaped">Y29t.dm13YXJl.bGlicmFyeQ==.dmM=.c3RvcmFnZQ==</entry>
+<entry key="name">listAvailableDisksForVMFS</entry>
+<entry key="type">ScriptModule</entry>
+<entry key="id">b854c430-6eca-46bd-b073-7c04c32c2390</entry>
+</properties>

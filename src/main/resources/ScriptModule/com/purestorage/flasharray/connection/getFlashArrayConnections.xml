@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="getFlashArrayConnections" result-type="Array/PS:FlashArrayConnection" api-version="6.0.0" id="a48395f9-c35f-44ee-a9dd-825ed2603650" version="2.1.0" allowed-operations="vef">
+  <description><![CDATA[Get all FlashArray Connections]]></description>
+  <script encoded="false"><![CDATA[
+var result = PSFlashArrayConnectionManager.getFlashArrayConnections();
+if(result){
+	System.log("Total FlashArray connections found: " + result.length);
+}
+System.debug("FlashArray connections found: " + result);
+return result;]]></script>
+</dunes-script-module>

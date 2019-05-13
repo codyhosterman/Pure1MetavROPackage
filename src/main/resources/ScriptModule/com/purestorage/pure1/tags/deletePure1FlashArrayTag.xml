@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="deletePure1FlashArrayTag" result-type="void" api-version="6.0.0" id="15ab7b1e-c912-4748-ba20-f833c3b96735" version="0.0.0" allowed-operations="vef">
+  <description><![CDATA[Returns the tags of the specified FlashArray from Pure1.]]></description>
+  <param n="restHost" t="REST:RESTHost"><![CDATA[]]></param>
+  <param n="pureOneToken" t="string"><![CDATA[]]></param>
+  <param n="flasharray" t="Array/PS:FlashArrayConnection"><![CDATA[]]></param>
+  <param n="keyName" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[if (flasharray == null)
+{
+	throw "You must enter in a FlashArray connection";
+}
+if (restHost == null)
+{
+	restHost = System.getModule("com.purestorage.pure1.connection").getPure1RestHost();
+	if (restHost == null)
+	{
+		throw "No Pure1 REST target found";
+	}
+	System.debug("Using REST host " + restHost.name);
+}
+if (pureOneToken == "")
+{
+	throw "You must pass in a Pure1 token";
+}
+var arrayNames = "";
+var arrayStringName = [];
+for (var i = 0;i < flasharray.length;i++)
+{
+	var faObject = PSFlashArrayManager.getFlashArray(flasharray[i]);
+	arrayNames = arrayNames + "'" + faObject.name + "'"
+	if (i != (flasharray.length -1))
+	{
+		arrayNames = arrayNames + ","
+	}
+	arrayStringName.push(faObject.name);
+}
+var request = restHost.createRequest("DELETE", "/api/1.latest/arrays/tags?keys='" + keyName + "'&resource_names=" + arrayNames);
+var bearerToken = "Bearer " + pureOneToken;
+request.setHeader("Authorization", bearerToken);
+var response = request.execute();
+//handle exceeding rate limit if encountered and retrying once. Refer to response headers for rate limits.
+if (response.statusCode == 429)
+{
+	var headers = response.getAllHeaders();
+	System.debug("API operations left this minute: " + headers.get("X-RateLimit-Remaining-minute"));
+	System.debug("API operations left this second: " + headers.get("X-RateLimit-Remaining-second"));
+	if (headers.get("X-RateLimit-Remaining-minute") == 0)
+	{
+		System.warn("Overran the per-minute Pure1 REST API rate limit...pausing for a minute and retrying.");
+		System.sleep(60000);
+	}
+	else
+	{
+		System.debug("Overran the per-second Pure1 REST API rate limit...quickly pausing and retrying.");
+		System.sleep(1000);
+	}
+	var response = request.execute();
+}
+if (response.statusCode != 200)
+{
+	throw "Pure1 " + response.statusCode + " Error: " + (JSON.parse(response.ContentAsString)).message;
+}
+else
+{
+	System.log("Successfully deleted tag " + keyName + " on FlashArrays " + arrayStringName);
+	return null;
+}
+
+]]></script>
+</dunes-script-module>

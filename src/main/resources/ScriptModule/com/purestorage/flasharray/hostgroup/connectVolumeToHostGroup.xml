@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="connectVolumeToHostGroup" result-type="boolean" api-version="6.0.0" id="137818e7-0224-4abf-b453-94b092ab2003" version="2.1.1" allowed-operations="vef">
+  <param n="volumeObj" t="PS:Volume"><![CDATA[Volume]]></param>
+  <param n="hostGroupObj" t="PS:HostGroup"><![CDATA[Host Group]]></param>
+  <param n="flashArrayConnection" t="PS:FlashArrayConnection"><![CDATA[FlashArray Connection]]></param>
+  <script encoded="false"><![CDATA[if(!flashArrayConnection) {
+	var errorMessage = "FlashArray Connection object should not be empty!";
+	System.error(errorMessage);
+	throw errorMessage;
+}
+if(!hostGroupObj) {
+	var errorMessage = "Host Group Object is required to connect the volume!";
+	System.error(errorMessage);
+	throw errorMessage;
+}
+
+if(!volumeObj) {
+	var errorMessage = "Volume Object is required to connect volume to the host!";
+	System.error(errorMessage);
+	throw errorMessage;
+}
+
+System.debug("Input parameters are: Volume Object: " + volumeObj + ", Host Group Object: " + hostGroupObj + ", FlashArray Connection: " + flashArrayConnection);
+
+var hostVolume; 
+try{ 
+	hostVolume = hostGroupObj.connectVolumeToHostGroup(volumeObj.name);
+}
+catch(e){
+    System.error("Exception occured while connecting Volume to HostGroup");
+	System.error("Message : "+e.message);
+	System.error(e);
+}
+
+System.debug("hostVolume : " + hostVolume);
+
+try
+{
+	if(hostVolume.vol == volumeObj.name)
+	{
+    	System.log("Volume: '" + volumeObj.name + "' Connected to Host Group: '" + hostGroupObj.name + "'");
+    	return true;
+	}
+}
+catch(e)
+{
+	System.log("Exception occured in the method connectVolumeToHostGroup");
+	System.error(e);
+	System.log(e);
+}
+return false;
+
+]]></script>
+</dunes-script-module>

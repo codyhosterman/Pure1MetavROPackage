@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">com.purestorage.flasharray.vmware.vcenter</entry>
+<entry key="categoryPathEscaped">Y29t.cHVyZXN0b3JhZ2U=.Zmxhc2hhcnJheQ==.dm13YXJl.dmNlbnRlcg==</entry>
+<entry key="name">vmfsVolumeToFAVolume</entry>
+<entry key="type">ScriptModule</entry>
+<entry key="id">1b75dd1c-aaeb-4204-9f34-82da261bfb0d</entry>
+</properties>

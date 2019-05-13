@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="vmfsDatastoreToFaVolume" result-type="PS:Volume" api-version="6.0.0" id="eba717d4-0b41-41ec-9c28-0e7564e62df9" version="1.0.0" allowed-operations="vef">
+  <description><![CDATA[Takes in a VMFS datastore and returns the FlashArray volume]]></description>
+  <param n="vmfsDatastore" t="VC:Datastore"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var volSerial = vmfsDatastore.info.vmfs.extent[0].diskName.substring(12);
+var flasharrays = PSFlashArrayConnectionManager.getFlashArrayConnections();
+var uri = ("/volume?filter=serial='" + volSerial + "'");
+for each (var fa in flasharrays)
+{
+    var flasharrayObj = PSFlashArrayManager.getFlashArray(fa);
+    var volume = System.getModule("com.purestorage.flasharray.restapi").runAPI(flasharrayObj,"GET",null,uri);
+	System.debug(volume);
+	if (volume.length > 2)
+	{
+		volume = volume.substr(1);
+		volume = volume.slice(0, -1);
+	    volume = JSON.parse(volume);
+     	System.log("The volume is on FlashArray " + fa.name);
+		System.log("The volume name is " + volume.name);
+		var restSession = flasharrayObj.getFlashArraySession();
+		var faVolume = PSVolumeManager.getVolume(volume.name, restSession)
+		System.debug(faVolume);
+		return faVolume;	
+     }
+}
+]]></script>
+</dunes-script-module>

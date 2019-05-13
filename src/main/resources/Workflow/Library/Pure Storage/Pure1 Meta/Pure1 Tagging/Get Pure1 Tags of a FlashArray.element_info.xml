@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">Library.Pure Storage.Pure1 Meta.Pure1 Tagging</entry>
+<entry key="categoryPathEscaped">TGlicmFyeQ==.UHVyZSBTdG9yYWdl.UHVyZTEgTWV0YQ==.UHVyZTEgVGFnZ2luZw==</entry>
+<entry key="name">Get Pure1 Tags of a FlashArray</entry>
+<entry key="type">Workflow</entry>
+<entry key="id">20f3d65d-6f6f-4a64-bec3-7f226831e62a</entry>
+</properties>

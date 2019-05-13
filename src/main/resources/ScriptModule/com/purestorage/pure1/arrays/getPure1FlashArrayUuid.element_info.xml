@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">com.purestorage.pure1.arrays</entry>
+<entry key="categoryPathEscaped">Y29t.cHVyZXN0b3JhZ2U=.cHVyZTE=.YXJyYXlz</entry>
+<entry key="name">getPure1FlashArrayUuid</entry>
+<entry key="type">ScriptModule</entry>
+<entry key="id">7b3e8545-77d1-4182-b616-da1ef324855f</entry>
+</properties>

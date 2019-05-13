@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">com.purestorage.pure1.tags</entry>
+<entry key="categoryPathEscaped">Y29t.cHVyZXN0b3JhZ2U=.cHVyZTE=.dGFncw==</entry>
+<entry key="name">deletePure1FlashArrayTag</entry>
+<entry key="type">ScriptModule</entry>
+<entry key="id">15ab7b1e-c912-4748-ba20-f833c3b96735</entry>
+</properties>

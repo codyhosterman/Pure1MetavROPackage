@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="getPure1FlashArrayVirtualIP" result-type="string" api-version="6.0.0" id="481d15b0-67b4-477a-b59d-51ef2a5e6df5" version="1.0.0" allowed-operations="vef">
+  <description><![CDATA[Returns the virtual IP of a given FlashArray from Pure1]]></description>
+  <param n="restHost" t="REST:RESTHost"><![CDATA[]]></param>
+  <param n="pureOneToken" t="string"><![CDATA[]]></param>
+  <param n="arrayName" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[//using default REST host if not passed in
+if (restHost == null)
+{
+	restHost = System.getModule("com.purestorage.pure1.connection").getPure1RestHost();
+	if (restHost == null)
+	{
+		throw "No Pure1 REST target found";
+	}
+	System.debug("Using REST host " + restHost.name);
+}
+var myFilter = "?filter=arrays%5Bany%5D.name='" + arrayName + "'"
+var request = restHost.createRequest("GET", "/api/1.latest/network-interfaces" + myFilter);
+if (pureOneToken == "")
+{
+	throw "You must pass in a Pure1 token";
+}
+var bearerToken = "Bearer " + pureOneToken;
+request.setHeader("Authorization", bearerToken);
+var response = request.execute();
+//handle exceeding rate limit if encountered and retrying once. Refer to response headers for rate limits.
+if (response.statusCode == 429)
+{
+	var headers = response.getAllHeaders();
+	System.debug("API operations left this minute: " + headers.get("X-RateLimit-Remaining-minute"));
+	System.debug("API operations left this second: " + headers.get("X-RateLimit-Remaining-second"));
+	if (headers.get("X-RateLimit-Remaining-minute") == 0)
+	{
+		System.warn("Overran the per-minute Pure1 REST API rate limit...pausing for a minute and retrying.");
+		System.sleep(60000);
+	}
+	else
+	{
+		System.debug("Overran the per-second Pure1 REST API rate limit...quickly pausing and retrying.");
+		System.sleep(1000);
+	}
+	var response = request.execute();
+}
+if (response.statusCode != 200)
+{
+	throw "Pure1 " + response.statusCode + " Error: " + (JSON.parse(response.ContentAsString)).message;
+}
+else
+{
+	//parse pure1 response
+	System.debug(response.ContentAsString);
+	var reponsePayload = (JSON.parse(response.ContentAsString)).items;
+}
+//find the virtual IP
+var arrayNetworks = reponsePayload;
+for (var i = 0; i < arrayNetworks.length;i++)
+{
+	if (arrayNetworks[i].name == 'vir0')
+	{
+		System.debug("FlashArray " + arrayName + "'s virtual IP is " + arrayNetworks[i].address);
+		return arrayNetworks[i].address;
+	}
+}
+]]></script>
+</dunes-script-module>

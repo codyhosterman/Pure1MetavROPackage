@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="vmfsVolumeToFAVolume" result-type="PS:Volume" api-version="6.0.0" id="1b75dd1c-aaeb-4204-9f34-82da261bfb0d" version="2.1.3" allowed-operations="vef">
+  <description><![CDATA[ VC datastore correlation to FlashArray volume object]]></description>
+  <param n="datastore" t="VC:Datastore"><![CDATA[vCenter Datastore]]></param>
+  <script encoded="false"><![CDATA[
+if(!datastore) throw "Error in vmfsVolumeToFAVolume action: datastore parameter must not be empty!"
+
+var dsName = datastore.summary.name;
+
+System.log( "Datastore '" + dsName + "' type: " + datastore.summary.type);
+
+if(datastore.summary.type !== "VMFS") throw "Datastore '"+ dsName + "' must be type of VMFS datastore!"
+
+if(!datastore.info.vmfs) throw "The datastore '"+ dsName + "' is not accessible!"
+
+var deviceNaa =  datastore.info.vmfs.extent[0].diskName;
+System.log( "Found SCSI device NAA: " + datastore.info.vmfs.extent[0].diskName);
+var volSerial = datastore.info.vmfs.extent[0].diskName.substring(12);
+System.log( "FlashArray volume serial number is : " + volSerial);
+
+//get FlashArray for volume serial
+ var resultFA = getFlashArray(volSerial); 
+ if(!resultFA){
+	var arrayError = "Could not identify the hosting FlashArray. If FlashArray is not added into vRO, Add it using 'Add FlashArray Connection' workflow.";
+	System.error(arrayError);
+	throw (arrayError);
+ }
+
+//Find Volume
+var resultVolume = getVolume(volSerial, resultFA);
+
+ if(!resultVolume) {
+	var volumeError = "Could not identify the volume on the FlashArray " + resultFA.name;
+	System.error(volumeError);
+	throw (volumeError);
+ }
+
+ System.debug("Volume found: " + resultVolume);
+
+ return resultVolume;
+
+ /*------------------------------------------------------------------------*/
+ function getFlashArray(volSerial){
+	arraySerial = volSerial.slice(0, -8);
+	System.log( "FlashArray serial number is : " + arraySerial);
+	//get all available FA connections
+	var conns = PSFlashArrayConnectionManager.getFlashArrayConnections();
+	var index;
+	
+	for(index = 0; index<conns.length; index++){
+		try{
+			var array = PSFlashArrayManager.getFlashArray(conns[index]);
+			
+			if(!array) continue;
+					
+			var arrayId = array.id.replace(/-/g, "");
+			arrayIdTrimmed = arrayId.slice(0,-16);
+			
+			if (arraySerial == arrayIdTrimmed){
+				System.log("The FlashArray is " + array.name);
+				return array;
+			}
+		}
+		catch(e){
+			System.error("Error in getting FlashArray for connection: " + conns[index]);
+		}
+	
+	}
+ return null;	
+}
+
+
+function getVolume(volSerial, array){
+	var volumes = array.getVolumes();
+	var volIndex;
+	for (volIndex = 0; volIndex < volumes.length; volIndex++) {
+	 	if (volumes[volIndex].serial == volSerial.toUpperCase()) {
+			var volume = volumes[volIndex];
+			System.log("The FlashArray volume name is " + volume.name);
+			return volume;
+		}
+	}
+ return null;
+}
+]]></script>
+</dunes-script-module>

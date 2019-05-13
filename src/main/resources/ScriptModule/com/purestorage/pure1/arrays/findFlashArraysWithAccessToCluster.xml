@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="findFlashArraysWithAccessToCluster" result-type="Array/PS:FlashArrayConnection" api-version="6.0.0" id="9c336896-a757-43af-bae8-d1eee31b0133" version="1.0.0" allowed-operations="vef">
+  <description><![CDATA[Loops through registed FlashArrays to see if they have a proper host group for the specified cluster.]]></description>
+  <param n="cluster" t="VC:ClusterComputeResource"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var faConnections = PSFlashArrayConnectionManager.getFlashArrayConnections();
+var validFlashArrays = [];
+for (var faCount = 0; faCount < faConnections.length;faCount++)
+{
+	try
+	{
+		System.getModule("com.purestorage.flasharray.vmware.vcenter").correlateClusterToHostGroup(cluster,faConnections[faCount]);
+		validFlashArrays.push(faConnections[faCount]);
+		System.log("Found valid FlashArray " + faConnections[faCount].name);
+	}
+	catch(e)
+	{
+		continue;
+	}
+}
+return validFlashArrays;]]></script>
+</dunes-script-module>

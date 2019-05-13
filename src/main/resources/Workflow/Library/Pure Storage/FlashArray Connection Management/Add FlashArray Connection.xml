@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item5" object-name="workflow:name=generic" id="2910d199-8277-4cbe-92f9-6749e5050fd0" version="2.1.0" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Add FlashArray Connection]]></display-name>
+  <description><![CDATA[Add a FlashArray Connection into the plug-in's repository.]]></description>
+  <position y="73.18181818181817" x="185.0"></position>
+  <input>
+    <param name="name" type="string">
+      <description><![CDATA[Name of this connection (e.g. Pure-01)]]></description>
+    </param>
+    <param name="host" type="string">
+      <description><![CDATA[IP or FQDN of FlashArray  (e.g.pure-001.example.com)]]></description>
+    </param>
+    <param name="autoPopulateApiVersions" type="boolean">
+      <description><![CDATA[Auto Populate API Versions]]></description>
+    </param>
+    <param name="apiVersion" type="string">
+      <description><![CDATA[Api version number for RESt]]></description>
+    </param>
+    <param name="username" type="string">
+      <description><![CDATA[FlashArray User Name]]></description>
+    </param>
+    <param name="password" type="SecureString">
+      <description><![CDATA[FlashArray Password]]></description>
+    </param>
+  </input>
+  <output>
+    <param name="actionResult" type="PS:FlashArrayConnection"></param>
+  </output>
+  <attrib name="errorCode" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="restUrl" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="baseUrl" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item1" type="end" end-mode="0">
+    <position y="399.95454545454544" x="185.0"></position>
+  </workflow-item>
+  <workflow-item name="item0" out-name="item1" throw-bind-name="errorCode" type="task" script-module="com.purestorage.flasharray.connection/addFlashArrayConnection">
+    <display-name><![CDATA[addFlashArrayConnection]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.purestorage.flasharray.connection").addFlashArrayConnection(name,baseUrl,username,password) ;]]></script>
+    <in-binding>
+      <bind name="name" type="string" export-name="name">
+        <description><![CDATA[Name of this connection (e.g. Pure-01)]]></description>
+      </bind>
+      <bind name="baseUrl" type="string" export-name="restUrl">
+        <description><![CDATA[FlashArray Base URL for REST API (e.g. https://pure-001.example.com/api/1.6)]]></description>
+      </bind>
+      <bind name="username" type="string" export-name="username">
+        <description><![CDATA[FlashArray User Name]]></description>
+      </bind>
+      <bind name="password" type="SecureString" export-name="password">
+        <description><![CDATA[FlashArray Password]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="PS:FlashArrayConnection" export-name="actionResult"></bind>
+    </out-binding>
+    <description><![CDATA[Add a FlashArray Connection to the plug-in's configuration file.]]></description>
+    <position y="337.2272727272727" x="145.0"></position>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item2" type="decision-activity" alt-out-name="item4">
+    <display-name><![CDATA[validateFlashArrayConnection]]></display-name>
+    <script encoded="false"><![CDATA[return true ;]]></script>
+    <in-binding>
+      <bind name="name" type="string" export-name="name">
+        <description><![CDATA[Name of this connection (e.g. Pure-01)]]></description>
+      </bind>
+      <bind name="baseUrl" type="string" export-name="baseUrl">
+        <description><![CDATA[FlashArray Base URL for REST API (e.g. https://pure-001.example.com/api/1.6)]]></description>
+      </bind>
+      <bind name="username" type="string" export-name="username">
+        <description><![CDATA[FlashArray User Name]]></description>
+      </bind>
+      <bind name="password" type="SecureString" export-name="password">
+        <description><![CDATA[FlashArray Password]]></description>
+      </bind>
+      <bind name="apiVersion" type="string" export-name="apiVersion"></bind>
+      <bind name="autoPopulateApiVersions" type="boolean" export-name="autoPopulateApiVersions"></bind>
+    </in-binding>
+    <reference type="ScriptModule" id="com.purestorage.flasharray.connection/validateFlashArrayConnection"></reference>
+    <description><![CDATA[Validate a FlashArray Connection.]]></description>
+    <position y="199.95454545454544" x="145.0"></position>
+  </workflow-item>
+  <workflow-item name="item4" throw-bind-name="errorCode" type="end" end-mode="1">
+    <position y="199.95454545454544" x="384.5"></position>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item0" type="task">
+    <display-name><![CDATA[Build API url]]></display-name>
+    <script encoded="false"><![CDATA[if(autoPopulateApiVersions){
+	// Here we get the correct Base URL after validation. So no need to check again.
+	if(baseUrl.charAt(baseUrl.length-1) == '/'){
+		restUrl = baseUrl + "api/" + apiVersion;
+	}
+	else{
+		restUrl = baseUrl + "/api/" + apiVersion;
+	}
+}
+else{
+restUrl = baseUrl;
+}
+]]></script>
+    <in-binding>
+      <bind name="baseUrl" type="string" export-name="baseUrl">
+        <description><![CDATA[FlashArray Base URL. (e.g. https://pure-001.example.com/)]]></description>
+      </bind>
+      <bind name="apiVersion" type="string" export-name="apiVersion">
+        <description><![CDATA[Api version number for RESt]]></description>
+      </bind>
+      <bind name="autoPopulateApiVersions" type="boolean" export-name="autoPopulateApiVersions">
+        <description><![CDATA[Auto Populate API Versions]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="restUrl" type="string" export-name="restUrl"></bind>
+    </out-binding>
+    <position y="273.59090909090907" x="145.0"></position>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item3" type="task">
+    <display-name><![CDATA[Create base url]]></display-name>
+    <script encoded="false"><![CDATA[baseUrl = "https://" + host;]]></script>
+    <in-binding>
+      <bind name="host" type="string" export-name="host">
+        <description><![CDATA[FlashArray Host Name or IP. (e.g.pure-001.example.com)]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="baseUrl" type="string" export-name="baseUrl"></bind>
+    </out-binding>
+    <position y="146.3181818181818" x="145.0"></position>
+  </workflow-item>
+  <presentation>
+    <p-step>
+      <title><![CDATA[Add a FlashArray Connection]]></title>
+      <p-group>
+        <title><![CDATA[FlashArray Connection Properties]]></title>
+        <p-param name="name">
+          <desc><![CDATA[Name of this connection]]></desc>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+          <p-qual kind="static" name="regexp" type="Regexp"><![CDATA[^[0-9A-Za-z]([-]*[0-9A-Za-z]){0,56}$]]></p-qual>
+          <p-qual kind="static" name="minStringLength" type="Number"><![CDATA[1]]></p-qual>
+          <p-qual kind="static" name="maxStringLength" type="Number"><![CDATA[56]]></p-qual>
+        </p-param>
+        <p-param name="host">
+          <desc><![CDATA[IP or FQDN of FlashArray (e.g.pure-001.example.com)]]></desc>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+        </p-param>
+        <p-param name="autoPopulateApiVersions">
+          <desc><![CDATA[Autopopulate the REST versions? ]]></desc>
+        </p-param>
+        <p-param name="apiVersion">
+          <desc><![CDATA[API Version]]></desc>
+          <p-qual kind="ognl" name="linkedEnumeration" type="Array/string"><![CDATA[GetAction("com.purestorage.flasharray.connection","getApiVersions").call(#host,#autoPopulateApiVersions)]]></p-qual>
+        </p-param>
+        <p-param name="username">
+          <desc><![CDATA[FlashArray User Name]]></desc>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+        </p-param>
+        <p-param name="password">
+          <desc><![CDATA[FlashArray Password]]></desc>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+        </p-param>
+      </p-group>
+    </p-step>
+  </presentation>
+</workflow>

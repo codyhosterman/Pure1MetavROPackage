@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">com.purestorage.flasharray.volume</entry>
+<entry key="categoryPathEscaped">Y29t.cHVyZXN0b3JhZ2U=.Zmxhc2hhcnJheQ==.dm9sdW1l</entry>
+<entry key="name">disconnectDestroyVolume</entry>
+<entry key="type">ScriptModule</entry>
+<entry key="id">9bd2c68d-2f79-4d45-893d-1a060fa691c8</entry>
+</properties>

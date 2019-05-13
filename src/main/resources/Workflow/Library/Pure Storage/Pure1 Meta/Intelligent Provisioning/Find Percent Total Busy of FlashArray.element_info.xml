@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">Library.Pure Storage.Pure1 Meta.Intelligent Provisioning</entry>
+<entry key="categoryPathEscaped">TGlicmFyeQ==.UHVyZSBTdG9yYWdl.UHVyZTEgTWV0YQ==.SW50ZWxsaWdlbnQgUHJvdmlzaW9uaW5n</entry>
+<entry key="name">Find Percent Total Busy of FlashArray</entry>
+<entry key="type">Workflow</entry>
+<entry key="id">6ec98eb6-1241-400a-8416-e3a03fa97905</entry>
+</properties>

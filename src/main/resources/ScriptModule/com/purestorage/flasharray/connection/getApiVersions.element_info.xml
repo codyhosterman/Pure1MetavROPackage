@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">com.purestorage.flasharray.connection</entry>
+<entry key="categoryPathEscaped">Y29t.cHVyZXN0b3JhZ2U=.Zmxhc2hhcnJheQ==.Y29ubmVjdGlvbg==</entry>
+<entry key="name">getApiVersions</entry>
+<entry key="type">ScriptModule</entry>
+<entry key="id">8a521539-4bcb-4cc3-ab86-e905bb0669bd</entry>
+</properties>

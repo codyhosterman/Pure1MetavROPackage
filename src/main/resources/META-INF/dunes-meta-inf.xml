@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>vro76:8281</comment>
+<entry key="vso-build-nb">12923317</entry>
+<entry key="pkg-description">Pure1 REST API Workflow Package</entry>
+<entry key="pkg-name">com.purestorage.pure1.meta</entry>
+<entry key="used-plugins">REST#2.3.2,PS#3.0.0,VC#6.5.0</entry>
+<entry key="pkg-owner">O=VMware,OU=Unknown,CN=vRO vro-dev.purecloud.com 73738b0f-f573-4b00-ae84-708e96387f32</entry>
+<entry key="vso-version">7.6.0.12923317</entry>
+<entry key="pkg-id">ff8080816a117636016a1178244a0171</entry>
+</properties>

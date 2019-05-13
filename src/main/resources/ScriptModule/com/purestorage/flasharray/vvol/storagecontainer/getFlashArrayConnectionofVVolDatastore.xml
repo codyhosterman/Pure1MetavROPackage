@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="getFlashArrayConnectionofVVolDatastore" result-type="PS:FlashArrayConnection" api-version="6.0.0" id="8d7b123d-78b8-4f50-85d7-699cca294342" version="1.0.0" allowed-operations="vef">
+  <description><![CDATA[Takes in a FlashArray VVol datastore and returns a matching FlashArray connection if one is found.]]></description>
+  <param n="vvolDatastore" t="VC:Datastore"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[if (vvolDatastore.summary.type != "VVOL")
+{
+	throw "This is not a VVol datastore";
+}
+if (vvolDatastore.info.vvolDS.storageArray[0].vendorId != "PURE")
+{
+	throw "This is not a Pure Storage VVol datastore";
+}
+var vvolUuid = vvolDatastore.info.vvolDS.storageArray[0].uuid;
+var flasharrays = System.getModule("com.purestorage.flasharray.connection").getFlashArrayConnections()
+for (var i = 0; i < flasharrays.length; i++)
+{
+	var flasharrayObj = PSFlashArrayManager.getFlashArray(flasharrays[i]);
+	if (vvolUuid == ("com.purestorage:" + flasharrayObj.id))
+	{
+		System.log("Found matching FlashArray connection " + flasharrayObj.name);
+		return flasharrays[i];
+	}
+}
+throw "No registered FlashArray connection found in the vRO inventory for this VVol datastore." ;
+
+
+]]></script>
+</dunes-script-module>

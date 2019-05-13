@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">com.purestorage.flasharray.volume</entry>
+<entry key="categoryPathEscaped">Y29t.cHVyZXN0b3JhZ2U=.Zmxhc2hhcnJheQ==.dm9sdW1l</entry>
+<entry key="name">createNewVolume</entry>
+<entry key="type">ScriptModule</entry>
+<entry key="id">b60bf207-6333-4207-8f4e-1df044dc99c8</entry>
+</properties>

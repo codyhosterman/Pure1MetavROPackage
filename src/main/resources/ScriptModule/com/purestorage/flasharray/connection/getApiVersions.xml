@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="getApiVersions" result-type="Array/Any" api-version="6.0.0" id="8a521539-4bcb-4cc3-ab86-e905bb0669bd" version="2.1.0" allowed-operations="vef">
+  <description><![CDATA[Returns all the API versions available for Pure Storage REST Api.]]></description>
+  <param n="host" t="string"><![CDATA[Host Name or IP]]></param>
+  <param n="autoPopulateApiVersions" t="boolean"><![CDATA[Auto Populate API Versions]]></param>
+  <script encoded="false"><![CDATA[if(autoPopulateApiVersions){
+	// Check for valid API versions 
+	if(host == null){
+		return null;
+	}
+	else{
+			host = "https://"+host;
+			
+			if(host.charAt(host.length-1) == '/'){
+				host = host + "api";
+			}
+			else{
+				host = host + "/api";
+			}
+			//var response = '{\"version\": [\"1.0\", \"1.1\", \"1.2\", \"1.3\", \"1.4\", \"1.5\", \"1.6\"]}';
+			var response = PSFlashArrayManager.getAllApiVersions(host);
+			var obj = JSON.parse(response);
+			return obj.version.reverse();
+		}
+}
+else{
+	return null;
+}]]></script>
+</dunes-script-module>

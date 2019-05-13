@@ -1,0 +1,585 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item15" object-name="workflow:name=generic" id="1506f699-46c0-42fe-8a2c-80df5faa1afe" version="1.0.0" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Register FlashArrays from Pure1]]></display-name>
+  <description><![CDATA[This workflow reaches out to Pure1 and pulls in all discovered FlashArrays and their network information. It then checks for network connectivity to the virtual IP and finds the array FQDN via DNS lookup. 
+Lastly it then registers all FlashArrays it can detect on the network with provided credentials. If the credentials fail, the workflow will ask you to re-enter them or to skip that array.]]></description>
+  <position y="9.045454545454543" x="125.0"></position>
+  <input>
+    <param name="pureOneConnection" type="ConfigurationElement">
+      <description><![CDATA[Configuration element]]></description>
+    </param>
+    <param name="restHost" type="REST:RESTHost"></param>
+    <param name="defaultConnection" type="boolean"></param>
+    <param name="username" type="string">
+      <description><![CDATA[FlashArray User Name]]></description>
+    </param>
+    <param name="password" type="SecureString">
+      <description><![CDATA[FlashArray Password]]></description>
+    </param>
+    <param name="singlePassword" type="boolean"></param>
+    <param name="registerUnresolvedFAs" type="boolean"></param>
+  </input>
+  <output>
+    <param name="flasharrayConnections" type="Array/PS:FlashArrayConnection"></param>
+  </output>
+  <attrib name="pureOneToken" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="arrayCount" type="number" read-only="false">
+    <value encoded="n"><![CDATA[0.0]]></value>
+  </attrib>
+  <attrib name="arrayName" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="virtualIp" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="flasharrays" type="Array/Properties" read-only="false"></attrib>
+  <attrib name="newFlashArrayNames" type="Array/string" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="validFlashArrayFqdns" type="Array/string" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="newFaCount" type="number" read-only="false">
+    <value encoded="n"><![CDATA[0.0]]></value>
+  </attrib>
+  <attrib name="validFlashArrayFqdn" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="ignoreWarnings" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[true]]></value>
+    <description><![CDATA[If set to true, the certificate is accepted silently and the certificate is added to the trusted store]]></description>
+  </attrib>
+  <attrib name="autoPopulateApiVersions" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[true]]></value>
+    <description><![CDATA[Auto Populate API Versions]]></description>
+  </attrib>
+  <attrib name="restVersions" type="Array/Any" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="faConnection" type="PS:FlashArrayConnection" read-only="false"></attrib>
+  <attrib name="baseUrl" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="validFlashArrayNames" type="Array/string" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="validFlashArrayName" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="finalUsername" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="finalPassword" type="SecureString" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="restVersion" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="errorCode" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="skipFA" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+  </attrib>
+  <attrib name="faConnections" type="Array/PS:FlashArrayConnection" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="181.77272727272725" x="484.5"></position>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item4" type="task">
+    <display-name><![CDATA[Get Array Name]]></display-name>
+    <script encoded="false"><![CDATA[arrayName = newFlashArrayNames[arrayCount];]]></script>
+    <in-binding>
+      <bind name="arrayCount" type="number" export-name="arrayCount"></bind>
+      <bind name="newFlashArrayNames" type="Array/string" export-name="newFlashArrayNames"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="arrayName" type="string" export-name="arrayName"></bind>
+    </out-binding>
+    <position y="19.045454545454543" x="784.5"></position>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item5" type="task" script-module="com.purestorage.pure1.arrays/getPure1FlashArrayVirtualIP">
+    <display-name><![CDATA[getPure1FlashArrayVirtualIP]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.purestorage.pure1.arrays").getPure1FlashArrayVirtualIP(restHost,pureOneToken,arrayName) ;]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="pureOneToken" type="string" export-name="pureOneToken"></bind>
+      <bind name="arrayName" type="string" export-name="arrayName"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="virtualIp"></bind>
+    </out-binding>
+    <description><![CDATA[Returns the virtual IP of a given FlashArray from Pure1]]></description>
+    <position y="19.045454545454543" x="924.5"></position>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item6" type="task">
+    <display-name><![CDATA[Check Network to FlashArray]]></display-name>
+    <script encoded="false"><![CDATA[if (virtualIp == null)
+{
+	System.warn("The FlashArray " + arrayName + "'s virtual IP was not found. Skipping this array.");
+}
+else
+{
+	var faDNSname = System.resolveIpAddress(virtualIp);
+	var skipArray = false;
+	if (faDNSname != virtualIp)
+	{
+		System.debug("The FlashArray " + arrayName + "'s FQDN is " + faDNSname);
+	}
+	else
+	{
+		System.debug("The FlashArray " + arrayName + "'s virtual IP " + virtualIp + " could not be resolved to a FQDN");
+		skipArray = true;
+	}
+	if ((skipArray ==true) && (registerUnresolvedFAs == false))
+	{
+		System.warn("The FlashArray " + arrayName + "'s virtual IP " + virtualIp + " could not be resolved to a FQDN and the workflow was configured to skip unresolvable FlashArrays. Skipping this array.");
+	}
+	else
+	{
+		var faReachable = System.isHostReachable(faDNSname,1000);
+		if (faReachable != true)
+		{
+			System.error("The FlashArray " + arrayName + " is not reachable on the network. Skipping...");
+		}
+		else
+		{
+			if (validFlashArrayFqdns == null)
+			{
+				validFlashArrayFqdns = [];
+				validFlashArrayFqdns.push(faDNSname);
+			}
+			else
+			{
+				validFlashArrayFqdns.push(faDNSname);
+			}
+			if (validFlashArrayNames == null)
+			{
+				validFlashArrayNames = [];
+				validFlashArrayNames.push(arrayName);
+			}
+			else
+			{
+				validFlashArrayNames.push(arrayName);
+			}
+		}
+	}
+}]]></script>
+    <in-binding>
+      <bind name="virtualIp" type="string" export-name="virtualIp"></bind>
+      <bind name="arrayName" type="string" export-name="arrayName"></bind>
+      <bind name="validFlashArrayFqdns" type="Array/string" export-name="validFlashArrayFqdns"></bind>
+      <bind name="arrayCount" type="number" export-name="arrayCount"></bind>
+      <bind name="validFlashArrayNames" type="Array/string" export-name="validFlashArrayNames"></bind>
+      <bind name="registerUnresolvedFAs" type="boolean" export-name="registerUnresolvedFAs"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="arrayName" type="string" export-name="arrayName"></bind>
+      <bind name="validFlashArrayFqdns" type="Array/string" export-name="validFlashArrayFqdns"></bind>
+      <bind name="arrayCount" type="number" export-name="arrayCount"></bind>
+      <bind name="validFlashArrayNames" type="Array/string" export-name="validFlashArrayNames"></bind>
+    </out-binding>
+    <position y="73.59090909090908" x="924.5"></position>
+  </workflow-item>
+  <workflow-item name="item6" prototype-id="increase-counter" out-name="item7" content-mode="x" type="task">
+    <display-name><![CDATA[Increase counter]]></display-name>
+    <script encoded="false"><![CDATA[//Auto-generated script
+counter = counter+1;]]></script>
+    <in-binding>
+      <bind name="counter" type="number" export-name="arrayCount">
+        <description><![CDATA[counter to increment]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="counter" type="number" export-name="arrayCount">
+        <description><![CDATA[counter incremented]]></description>
+      </bind>
+    </out-binding>
+    <description><![CDATA[Increment a counter by one]]></description>
+    <position y="128.13636363636363" x="924.5"></position>
+  </workflow-item>
+  <workflow-item name="item7" out-name="item8" type="custom-condition" alt-out-name="item3">
+    <display-name><![CDATA[Custom decision]]></display-name>
+    <script encoded="false"><![CDATA[if (newFlashArrayNames.length > arrayCount)
+{
+	return false;
+}
+else
+{
+	System.log("Registering " + validFlashArrayNames.length + " FlashArrays.");
+	System.debug(validFlashArrayNames);
+	return true;
+}]]></script>
+    <in-binding>
+      <bind name="newFlashArrayNames" type="Array/string" export-name="newFlashArrayNames"></bind>
+      <bind name="arrayCount" type="number" export-name="arrayCount"></bind>
+      <bind name="validFlashArrayNames" type="Array/string" export-name="validFlashArrayNames"></bind>
+    </in-binding>
+    <position y="63.59090909090908" x="784.5"></position>
+  </workflow-item>
+  <workflow-item name="item11" out-name="item2" type="task" script-module="com.purestorage.pure1.arrays/getPure1FlashArrays">
+    <display-name><![CDATA[getPure1FlashArrays]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.purestorage.pure1.arrays").getPure1FlashArrays(restHost,pureOneToken) ;]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="pureOneToken" type="string" export-name="pureOneToken"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="Array/Properties" export-name="flasharrays"></bind>
+    </out-binding>
+    <description><![CDATA[Returns the names of all of the FlashArray found in your Pure1 organization]]></description>
+    <position y="19.045454545454543" x="444.5"></position>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item3" type="task">
+    <display-name><![CDATA[Find Unregistered FlashArrays]]></display-name>
+    <script encoded="false"><![CDATA[System.log("Looking for arrays that are already registered...");
+var newFlashArrayNames = [];
+var foundFa = false;
+var faConnections = PSFlashArrayConnectionManager.getFlashArrayConnections();
+for (var faCount = 0; faCount < flasharrays.length; faCount++)
+{
+	foundFa = false;
+	for (var i = 0; i < faConnections.length; i++)
+	{
+		var flasharrayObj = PSFlashArrayManager.getFlashArray(faConnections[i]);
+		if (flasharrays[faCount].id == flasharrayObj.id)
+		{
+			System.log("FlashArray " + flasharrays[faCount].name + " is already registered with vRO. Skipping...");
+			foundFa = true;
+			break;
+		}
+	}
+	if (foundFa == false)
+	{
+		newFlashArrayNames.push(flasharrays[faCount].name);
+	}
+}
+validFlashArrays = [];
+System.log("Looking for array FQDNs and verifying network connectivity...");]]></script>
+    <in-binding>
+      <bind name="flasharrays" type="Array/Properties" export-name="flasharrays"></bind>
+      <bind name="validFlashArrays" type="Array/string" export-name="validFlashArrayFqdns"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="newFlashArrayNames" type="Array/string" export-name="newFlashArrayNames"></bind>
+      <bind name="validFlashArrays" type="Array/string" export-name="validFlashArrayFqdns"></bind>
+    </out-binding>
+    <position y="19.045454545454543" x="624.5"></position>
+  </workflow-item>
+  <workflow-item name="item8" out-name="item9" type="task">
+    <display-name><![CDATA[Get FA Connection URL]]></display-name>
+    <script encoded="false"><![CDATA[validFlashArrayFqdn = validFlashArrayFqdns[newFaCount];
+validFlashArrayName = validFlashArrayNames[newFaCount];
+]]></script>
+    <in-binding>
+      <bind name="validFlashArrayFqdns" type="Array/string" export-name="validFlashArrayFqdns"></bind>
+      <bind name="newFaCount" type="number" export-name="newFaCount"></bind>
+      <bind name="validFlashArrayFqdn" type="string" export-name="validFlashArrayFqdn"></bind>
+      <bind name="validFlashArrayNames" type="Array/string" export-name="validFlashArrayNames"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="validFlashArrayFqdn" type="string" export-name="validFlashArrayFqdn"></bind>
+      <bind name="validFlashArrayName" type="string" export-name="validFlashArrayName"></bind>
+    </out-binding>
+    <position y="128.13636363636363" x="784.5"></position>
+  </workflow-item>
+  <workflow-item name="item9" out-name="item13" type="link" linked-workflow-id="122b48a9-3cf0-4a07-8db8-4f15421b5b8c">
+    <display-name><![CDATA[Import FlashArray certificate from URL]]></display-name>
+    <in-binding>
+      <bind name="url" type="string" export-name="validFlashArrayFqdn">
+        <description><![CDATA[URL or just host:port for non-HTTPS SSL services:]]></description>
+      </bind>
+      <bind name="ignoreWarnings" type="boolean" export-name="ignoreWarnings">
+        <description><![CDATA[If set to true, the certificate is accepted silently and the certificate is added to the trusted store]]></description>
+      </bind>
+    </in-binding>
+    <out-binding></out-binding>
+    <description><![CDATA[Imports an SSL certificate into the server trust store.]]></description>
+    <position y="191.77272727272725" x="784.5"></position>
+  </workflow-item>
+  <workflow-item name="item10" prototype-id="increase-counter" out-name="item12" content-mode="x" type="task">
+    <display-name><![CDATA[Increase counter]]></display-name>
+    <script encoded="false"><![CDATA[//Auto-generated script
+counter = counter+1;]]></script>
+    <in-binding>
+      <bind name="counter" type="number" export-name="newFaCount">
+        <description><![CDATA[counter to increment]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="counter" type="number" export-name="newFaCount">
+        <description><![CDATA[counter incremented]]></description>
+      </bind>
+    </out-binding>
+    <description><![CDATA[Increment a counter by one]]></description>
+    <position y="73.59090909090908" x="625.0"></position>
+  </workflow-item>
+  <workflow-item name="item12" out-name="item21" type="custom-condition" alt-out-name="item8">
+    <display-name><![CDATA[Custom decision]]></display-name>
+    <script encoded="false"><![CDATA[if (validFlashArrays.length > newFaCount)
+{
+	return false;
+}
+else
+{
+	System.log("Registered " + newFaCount + " arrays.");
+	return true;
+}]]></script>
+    <in-binding>
+      <bind name="newFaCount" type="number" export-name="newFaCount"></bind>
+      <bind name="validFlashArrays" type="Array/string" export-name="validFlashArrayFqdns"></bind>
+      <bind name="faConnections" type="Array/PS:FlashArrayConnection" export-name="faConnections"></bind>
+    </in-binding>
+    <position y="118.13636363636363" x="624.5"></position>
+  </workflow-item>
+  <workflow-item name="item13" out-name="item14" type="task" script-module="com.purestorage.flasharray.connection/getApiVersions">
+    <display-name><![CDATA[getApiVersions]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.purestorage.flasharray.connection").getApiVersions(host,autoPopulateApiVersions) ;]]></script>
+    <in-binding>
+      <bind name="host" type="string" export-name="validFlashArrayFqdn">
+        <description><![CDATA[Host Name or IP]]></description>
+      </bind>
+      <bind name="autoPopulateApiVersions" type="boolean" export-name="autoPopulateApiVersions">
+        <description><![CDATA[Auto Populate API Versions]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="Array/Any" export-name="restVersions"></bind>
+    </out-binding>
+    <description><![CDATA[Returns all the API versions available for Pure Storage REST Api.]]></description>
+    <position y="255.40909090909088" x="784.5"></position>
+  </workflow-item>
+  <workflow-item name="item14" out-name="item16" type="task">
+    <display-name><![CDATA[Gather REST version]]></display-name>
+    <script encoded="false"><![CDATA[System.debug(validFlashArrayName + " REST versions: " + restVersions);
+for (var i = 0; i < restVersions.length;i++)
+{
+	if ((restVersions[i].indexOf("1.")) != -1)
+	{
+		var restVersion = restVersions[i];
+		System.log("Registering with REST version " + restVersion + " on " + validFlashArrayName);
+		break;
+	}
+}
+]]></script>
+    <in-binding>
+      <bind name="restVersions" type="Array/Any" export-name="restVersions"></bind>
+      <bind name="validFlashArrayFqdn" type="string" export-name="validFlashArrayFqdn"></bind>
+      <bind name="validFlashArrayName" type="string" export-name="validFlashArrayName"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="baseUrl" type="string" export-name="baseUrl"></bind>
+      <bind name="restVersion" type="string" export-name="restVersion"></bind>
+    </out-binding>
+    <position y="255.40909090909088" x="624.5"></position>
+  </workflow-item>
+  <workflow-item name="item15" out-name="item11" type="task" script-module="com.purestorage.pure1.connection/pure1AuthenticateSession">
+    <display-name><![CDATA[pure1AuthenticateSession]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.purestorage.pure1.connection").pure1AuthenticateSession(restHost,pureOneConnection) ;]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="pureOneConnection" type="ConfigurationElement" export-name="pureOneConnection"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="pureOneToken"></bind>
+    </out-binding>
+    <description><![CDATA[Returns access token from default configuration element or specified element. No inputs required by default.]]></description>
+    <position y="19.045454545454543" x="264.5"></position>
+  </workflow-item>
+  <workflow-item name="item17" out-name="item10" type="task">
+    <display-name><![CDATA[Gather FlashArray Connections]]></display-name>
+    <script encoded="false"><![CDATA[if (faConnections == null)
+{
+	var faConnections = [];
+	faConnections.push(faConnection);
+}
+else
+{
+	faConnections.push(faConnection);
+}]]></script>
+    <in-binding>
+      <bind name="faConnection" type="PS:FlashArrayConnection" export-name="faConnection"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="faConnections" type="Array/PS:FlashArrayConnection" export-name="faConnections"></bind>
+    </out-binding>
+    <position y="73.59090909090908" x="85.0"></position>
+  </workflow-item>
+  <workflow-item name="item16" out-name="item20" type="custom-condition" alt-out-name="item19">
+    <display-name><![CDATA[Custom decision]]></display-name>
+    <script encoded="false"><![CDATA[if (singlePassword == false)
+{
+	return false;
+}
+else
+{
+	return true;
+}]]></script>
+    <in-binding>
+      <bind name="singlePassword" type="boolean" export-name="singlePassword"></bind>
+    </in-binding>
+    <position y="245.40909090909088" x="444.5"></position>
+  </workflow-item>
+  <workflow-item name="item19" out-name="item1" type="input">
+    <display-name><![CDATA[Enter Credentials]]></display-name>
+    <in-binding>
+      <bind name="finalUsername" type="string" export-name="finalUsername"></bind>
+      <bind name="finalPassword" type="SecureString" export-name="finalPassword"></bind>
+      <bind name="validFlashArrayName" type="string" export-name="validFlashArrayName"></bind>
+      <bind name="skipFA" type="boolean" export-name="skipFA"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="finalUsername" type="string" export-name="finalUsername"></bind>
+      <bind name="finalPassword" type="SecureString" export-name="finalPassword"></bind>
+      <bind name="skipFA" type="boolean" export-name="skipFA"></bind>
+    </out-binding>
+    <presentation>
+      <p-step>
+        <title><![CDATA[Credentials]]></title>
+        <desc><![CDATA[Please enter the credentials for ${validFlashArrayName}]]></desc>
+        <p-param name="skipFA">
+          <desc><![CDATA[Do you want to skip this FlashArray (${validFlashArrayName})]]></desc>
+          <p-qual kind="static" name="defaultValue" type="boolean"><![CDATA[__NULL__]]></p-qual>
+        </p-param>
+        <p-param name="finalUsername">
+          <desc><![CDATA[Please verify your FlashArray username]]></desc>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+          <p-qual kind="ognl" name="notVisible" type="boolean"><![CDATA[#skipFA]]></p-qual>
+        </p-param>
+        <p-param name="finalPassword">
+          <desc><![CDATA[Please re-enter your FlashArray password]]></desc>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+          <p-qual kind="ognl" name="notVisible" type="boolean"><![CDATA[#skipFA]]></p-qual>
+        </p-param>
+      </p-step>
+    </presentation>
+    <position y="191.77272727272725" x="264.5"></position>
+  </workflow-item>
+  <workflow-item name="item20" out-name="item18" type="task">
+    <display-name><![CDATA[Configure Credentials]]></display-name>
+    <script encoded="false"><![CDATA[finalUsername = username;
+finalPassword = password;]]></script>
+    <in-binding>
+      <bind name="username" type="string" export-name="username">
+        <description><![CDATA[FlashArray User Name]]></description>
+      </bind>
+      <bind name="password" type="SecureString" export-name="password">
+        <description><![CDATA[FlashArray Password]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="finalUsername" type="string" export-name="finalUsername"></bind>
+      <bind name="finalPassword" type="SecureString" export-name="finalPassword"></bind>
+    </out-binding>
+    <position y="255.40909090909088" x="84.5"></position>
+  </workflow-item>
+  <workflow-item name="item18" out-name="item17" catch-name="item19" throw-bind-name="errorCode" type="link" linked-workflow-id="2910d199-8277-4cbe-92f9-6749e5050fd0">
+    <display-name><![CDATA[Add FlashArray Connection]]></display-name>
+    <in-binding>
+      <bind name="name" type="string" export-name="validFlashArrayName">
+        <description><![CDATA[Name of this connection (e.g. Pure-01)]]></description>
+      </bind>
+      <bind name="host" type="string" export-name="validFlashArrayFqdn">
+        <description><![CDATA[IP or FQDN of FlashArray  (e.g.pure-001.example.com)]]></description>
+      </bind>
+      <bind name="autoPopulateApiVersions" type="boolean" export-name="autoPopulateApiVersions">
+        <description><![CDATA[Auto Populate API Versions]]></description>
+      </bind>
+      <bind name="apiVersion" type="string" export-name="restVersion">
+        <description><![CDATA[Api version number for RESt]]></description>
+      </bind>
+      <bind name="username" type="string" export-name="finalUsername">
+        <description><![CDATA[FlashArray User Name]]></description>
+      </bind>
+      <bind name="password" type="SecureString" export-name="finalPassword">
+        <description><![CDATA[FlashArray Password]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="PS:FlashArrayConnection" export-name="faConnection"></bind>
+    </out-binding>
+    <description><![CDATA[Add a FlashArray Connection into the plug-in's repository.]]></description>
+    <position y="128.13636363636363" x="85.0"></position>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item18" type="custom-condition" alt-out-name="item10">
+    <display-name><![CDATA[Custom decision]]></display-name>
+    <script encoded="false"><![CDATA[if (skipFA == false)
+{
+	return true;
+}
+else
+{
+	System.log("Skipping FlashArray " + validFlashArrayName);
+	return false;
+}
+]]></script>
+    <in-binding>
+      <bind name="skipFA" type="boolean" export-name="skipFA"></bind>
+      <bind name="validFlashArrayName" type="string" export-name="validFlashArrayName"></bind>
+    </in-binding>
+    <position y="118.13636363636363" x="264.5"></position>
+  </workflow-item>
+  <workflow-item name="item21" out-name="item0" type="task">
+    <display-name><![CDATA[Return Connections]]></display-name>
+    <script encoded="false"><![CDATA[flasharrayConnections = faConnections;]]></script>
+    <in-binding>
+      <bind name="faConnections" type="Array/PS:FlashArrayConnection" export-name="faConnections"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="flasharrayConnections" type="Array/PS:FlashArrayConnection" export-name="flasharrayConnections"></bind>
+    </out-binding>
+    <position y="191.77272727272725" x="625.0"></position>
+  </workflow-item>
+  <presentation>
+    <p-step>
+      <title><![CDATA[Connection]]></title>
+      <p-group>
+        <title><![CDATA[Credentials]]></title>
+        <p-param name="singlePassword">
+          <desc><![CDATA[Do all FlashArrays use the same credentials?
+
+If not, password prompt will be shown for each FlashArray during registration.]]></desc>
+          <p-qual kind="static" name="defaultValue" type="boolean"><![CDATA[true]]></p-qual>
+        </p-param>
+        <p-param name="username">
+          <desc><![CDATA[FlashArray Username]]></desc>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+          <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#singlePassword]]></p-qual>
+        </p-param>
+        <p-param name="password">
+          <desc><![CDATA[FlashArray Password]]></desc>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+          <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#singlePassword]]></p-qual>
+        </p-param>
+        <p-param name="registerUnresolvedFAs">
+          <desc><![CDATA[Do you want to register FlashArrays that cannot be resolved to a FQDN? (will fall back to IP if yes, will skip if no)]]></desc>
+          <p-qual kind="static" name="defaultValue" type="boolean"><![CDATA[true]]></p-qual>
+        </p-param>
+        <p-param name="defaultConnection">
+          <desc><![CDATA[Use default Pure1 connection?]]></desc>
+          <p-qual kind="static" name="defaultValue" type="boolean"><![CDATA[true]]></p-qual>
+        </p-param>
+      </p-group>
+      <p-group>
+        <title><![CDATA[Advanced]]></title>
+        <p-qual kind="ognl" name="notVisible" type="boolean"><![CDATA[#defaultConnection]]></p-qual>
+        <p-param name="pureOneConnection">
+          <desc><![CDATA[Specify non-default connection (optional)]]></desc>
+          <p-qual kind="ognl" name="notVisible" type="boolean"><![CDATA[#defaultConnection]]></p-qual>
+        </p-param>
+        <p-param name="restHost">
+          <desc><![CDATA[Specify non-default Pure1 REST target (optional)]]></desc>
+          <p-qual kind="static" name="defaultValue" type="REST:RESTHost"><![CDATA[__NULL__]]></p-qual>
+          <p-qual kind="ognl" name="notVisible" type="boolean"><![CDATA[#defaultConnection]]></p-qual>
+        </p-param>
+      </p-group>
+    </p-step>
+  </presentation>
+</workflow>

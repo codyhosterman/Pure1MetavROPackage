@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item3" object-name="workflow:name=generic" id="7b9957f4-8807-4103-9289-38bf34ef6b24" version="2.1.2" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Create VMFS Datastore]]></display-name>
+  <description><![CDATA[Creates a datastore on a Fibre Channel, iSCSI or local SCSI disk. Only disks that are not currently in use by an existing VMFS are applicable to new datastore creation. The new datastore allocates the maximum available space of the specified disk.]]></description>
+  <position y="73.18181818181817" x="65.0"></position>
+  <input>
+    <param name="host" type="VC:HostSystem">
+      <description><![CDATA[The vCenter Server host system]]></description>
+    </param>
+    <param name="diskName" type="string">
+      <description><![CDATA[The display name of the disk that will be used to contain the new VMFS datastore]]></description>
+    </param>
+    <param name="datastoreName" type="string">
+      <description><![CDATA[The datastore name]]></description>
+    </param>
+  </input>
+  <output>
+    <param name="datastore" type="VC:Datastore">
+      <description><![CDATA[The new datastore]]></description>
+    </param>
+  </output>
+  <attrib name="errorMessage" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+    <description><![CDATA[The error message if there is any exception]]></description>
+  </attrib>
+  <attrib name="hostScsiDisk" type="Any" read-only="false">
+    <value encoded="n"><![CDATA[string#]]></value>
+    <description><![CDATA[The SCSI disk that will be used to contain the new datastore]]></description>
+  </attrib>
+  <attrib name="vmfsDatastoreOption" type="Any" read-only="false">
+    <value encoded="n"><![CDATA[string#]]></value>
+    <description><![CDATA[The VMFS datastore layout configuration]]></description>
+  </attrib>
+  <attrib name="capacity" type="number" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+    <description><![CDATA[The VMFS datastore Capacity]]></description>
+  </attrib>
+  <workflow-item name="item0" out-name="item5" throw-bind-name="errorMessage" type="task">
+    <display-name><![CDATA[Find datastore create options]]></display-name>
+    <script encoded="false"><![CDATA[if(!host) throw "Esxi host must not be empty. host parameter is null!";
+var hostDatastoreSystem = VcPlugin.toManagedObject( host, host.configManager.datastoreSystem );
+
+var vmfsDatastoreOptions;
+ 
+
+if(host.summary.config.product.apiVersion == "6.5" ) {
+	System.debug("ESXi host apiVersion: 6.5. Creating datastore with VMFS 6.");
+	vmfsDatastoreOptions = hostDatastoreSystem.queryVmfsDatastoreCreateOptions( hostScsiDisk.devicePath , 6);
+ }
+else {
+	System.debug("ESXi host apiVersion: " + host.summary.config.product.apiVersion);
+	vmfsDatastoreOptions = hostDatastoreSystem.queryVmfsDatastoreCreateOptions( hostScsiDisk.devicePath);
+ }
+// Gets the first available VMFS datastore create option
+if (vmfsDatastoreOptions.length > 0){
+	vmfsDatastoreOption = vmfsDatastoreOptions[0];
+	vmfsDatastoreOption.spec.vmfs.volumeName = datastoreName;
+} else {
+	throw "There is no layout configuration available for disk " + hostScsiDisk.displayName;
+}]]></script>
+    <in-binding>
+      <bind name="host" type="VC:HostSystem" export-name="host"></bind>
+      <bind name="datastoreName" type="string" export-name="datastoreName"></bind>
+      <bind name="hostScsiDisk" type="Any" export-name="hostScsiDisk"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="vmfsDatastoreOption" type="Any" export-name="vmfsDatastoreOption"></bind>
+    </out-binding>
+    <position y="82.68181818181817" x="305.0"></position>
+  </workflow-item>
+  <workflow-item name="item1" type="end" end-mode="0">
+    <position y="73.18181818181817" x="825.0"></position>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item0" throw-bind-name="errorMessage" type="task">
+    <display-name><![CDATA[Find available disk]]></display-name>
+    <script encoded="false"><![CDATA[var hostDatastoreSystem = VcPlugin.toManagedObject( host, host.configManager.datastoreSystem );
+
+var hostScsiDisks = hostDatastoreSystem.queryAvailableDisksForVmfs(null);
+System.log(diskName);
+System.log(hostScsiDisks.length);
+for each (var disk in hostScsiDisks){
+	System.log(disk.displayName);
+	if (diskName == disk.displayName){
+		hostScsiDisk = disk;
+		System.log("Disk name " + hostScsiDisk.canonicalName);
+		System.log("Device path " + hostScsiDisk.devicePath);
+		var diskCapacity = hostScsiDisk.capacity;
+		var capacityGB = diskCapacity.block * diskCapacity.blockSize / 1073741824;
+		System.log("Disk capacity " + capacityGB + " GB");
+		capacity = capacityGB
+		break;
+		}
+		
+	}
+
+if (!hostScsiDisk) {
+	throw "There is no available disk with name " + diskName;
+}]]></script>
+    <in-binding>
+      <bind name="host" type="VC:HostSystem" export-name="host"></bind>
+      <bind name="diskName" type="string" export-name="diskName"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="hostScsiDisk" type="Any" export-name="hostScsiDisk"></bind>
+      <bind name="capacity" type="number" export-name="capacity"></bind>
+    </out-binding>
+    <position y="82.68181818181817" x="165.0"></position>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item1" throw-bind-name="errorMessage" type="task">
+    <display-name><![CDATA[Create datastore]]></display-name>
+    <script encoded="false"><![CDATA[var hostDatastoreSystem = VcPlugin.toManagedObject( host, host.configManager.datastoreSystem );
+
+datastore = hostDatastoreSystem.createVmfsDatastore(vmfsDatastoreOption.spec);
+
+System.log("Added datastore " + datastoreName);]]></script>
+    <in-binding>
+      <bind name="host" type="VC:HostSystem" export-name="host"></bind>
+      <bind name="vmfsDatastoreOption" type="Any" export-name="vmfsDatastoreOption"></bind>
+      <bind name="datastoreName" type="string" export-name="datastoreName"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="datastore" type="VC:Datastore" export-name="datastore"></bind>
+    </out-binding>
+    <position y="83.18181818181817" x="645.0"></position>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item4" throw-bind-name="errorMessage" type="task">
+    <display-name><![CDATA[Compute disk partition]]></display-name>
+    <script encoded="false"><![CDATA[var hostStorageSystem = VcPlugin.toManagedObject( host, host.configManager.storageSystem );
+var layout = vmfsDatastoreOption.info.layout;
+System.log("Disk total number of blocks " + layout.total.block);
+System.log("Disk block size " + layout.total.blockSize);
+var numberOfBlocks = Math.floor((capacity * 1073741824) / layout.total.blockSize);
+System.log("Number of blocks required for the new partition " + numberOfBlocks);
+if (numberOfBlocks > layout.total.block) {
+	throw "The number of blocks reqiuired for "+ capacity +" GB is greater then the total number of disk blocks!";
+}
+var partitionFormat = vmfsDatastoreOption.spec.partition.partitionFormat;
+System.log("Partition format " + partitionFormat);
+var hostDiskPartitionInfo = hostStorageSystem.computeDiskPartitionInfo(hostScsiDisk.devicePath, layout , partitionFormat);
+vmfsDatastoreOption.spec.partition = hostDiskPartitionInfo.spec;
+]]></script>
+    <in-binding>
+      <bind name="host" type="VC:HostSystem" export-name="host"></bind>
+      <bind name="hostScsiDisk" type="Any" export-name="hostScsiDisk"></bind>
+      <bind name="capacity" type="number" export-name="capacity"></bind>
+      <bind name="vmfsDatastoreOption" type="Any" export-name="vmfsDatastoreOption"></bind>
+    </in-binding>
+    <out-binding></out-binding>
+    <position y="82.68181818181817" x="465.0"></position>
+  </workflow-item>
+  <presentation>
+    <p-step>
+      <title><![CDATA[Add a datastore on a Fiber Channel, iSCSI, or local SCSI disk]]></title>
+      <p-group>
+        <title><![CDATA[Select a Host]]></title>
+        <desc><![CDATA[Select a vCenter Server host.]]></desc>
+        <p-param name="host">
+          <desc><![CDATA[ESXI Host]]></desc>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+          <p-qual kind="static" name="show-select-as" type="string"><![CDATA[list]]></p-qual>
+        </p-param>
+      </p-group>
+      <p-group>
+        <title><![CDATA[Select Disk]]></title>
+        <desc><![CDATA[Select a disk/LUN to create datastore. Only disks that are not in use by an existing VMFS are listed.]]></desc>
+        <p-param name="diskName">
+          <desc><![CDATA[Disk/LUN name]]></desc>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+          <p-qual kind="ognl" name="genericEnumeration" type="Array/string"><![CDATA[GetAction("com.vmware.library.vc.storage","listAvailableDisksForVMFS").call( #host )]]></p-qual>
+        </p-param>
+      </p-group>
+      <p-group>
+        <title><![CDATA[Properties]]></title>
+        <p-param name="datastoreName">
+          <desc><![CDATA[Datastore name]]></desc>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+        </p-param>
+      </p-group>
+    </p-step>
+  </presentation>
+</workflow>

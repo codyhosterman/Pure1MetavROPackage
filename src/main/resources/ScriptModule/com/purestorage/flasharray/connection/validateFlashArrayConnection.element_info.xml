@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">com.purestorage.flasharray.connection</entry>
+<entry key="categoryPathEscaped">Y29t.cHVyZXN0b3JhZ2U=.Zmxhc2hhcnJheQ==.Y29ubmVjdGlvbg==</entry>
+<entry key="name">validateFlashArrayConnection</entry>
+<entry key="type">ScriptModule</entry>
+<entry key="id">f3f4c532-f5da-41e6-99b3-14b543ad2e46</entry>
+</properties>

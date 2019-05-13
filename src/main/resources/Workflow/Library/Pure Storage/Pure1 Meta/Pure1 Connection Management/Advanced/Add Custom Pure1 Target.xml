@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item4" object-name="Workflow:name=generic" id="cb9e0191-aa41-42dc-b272-cfc9466389b3" version="1.0.1" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Add Custom Pure1 Target]]></display-name>
+  <description><![CDATA[Adds a REST host to the plug-in's inventory.]]></description>
+  <position y="136.3181818181818" x="45.0"></position>
+  <input>
+    <param name="useProxy" type="boolean">
+      <description><![CDATA[Use Proxy]]></description>
+    </param>
+    <param name="proxyHost" type="string">
+      <description><![CDATA[Proxy host]]></description>
+    </param>
+    <param name="proxyPort" type="number">
+      <description><![CDATA[Proxy port]]></description>
+    </param>
+    <param name="proxyAuthentication" type="string">
+      <description><![CDATA[Proxy AuthenticationType]]></description>
+    </param>
+    <param name="proxyAuthUserName" type="string">
+      <description><![CDATA[Proxy user name]]></description>
+    </param>
+    <param name="proxyAuthPassword" type="SecureString">
+      <description><![CDATA[Proxy password]]></description>
+    </param>
+    <param name="proxySessionMode" type="string">
+      <description><![CDATA[Proxy Session mode]]></description>
+    </param>
+  </input>
+  <output>
+    <param name="restHost" type="REST:RESTHost">
+      <description><![CDATA[The created RESTHost]]></description>
+    </param>
+  </output>
+  <attrib name="errorCode" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+    <description><![CDATA[Error code]]></description>
+  </attrib>
+  <attrib name="host" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="authentication" type="string" read-only="false">
+    <value encoded="n"><![CDATA[NONE]]></value>
+    <description><![CDATA[Host's authentication type]]></description>
+  </attrib>
+  <attrib name="name" type="string" read-only="false">
+    <value encoded="n"><![CDATA[Pure1 Connection]]></value>
+    <description><![CDATA[Host's name]]></description>
+  </attrib>
+  <attrib name="url" type="string" read-only="false">
+    <value encoded="n"><![CDATA[https://api.pure1.purestorage.com]]></value>
+    <description><![CDATA[Host's base URL]]></description>
+  </attrib>
+  <attrib name="autoUrlRedirection" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+    <description><![CDATA[Automatically URL redirection]]></description>
+  </attrib>
+  <attrib name="parallelRequestExecution" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+  </attrib>
+  <attrib name="hostVerification" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[true]]></value>
+    <description><![CDATA[Verify whether the target hostname matches the names stored inside the server's X.509 certificate]]></description>
+  </attrib>
+  <attrib name="ignoreWarnings" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[true]]></value>
+    <description><![CDATA[If set to true, the certificate is accepted silently and the certificate is added to the trusted store]]></description>
+  </attrib>
+  <attrib name="connectionTimeout" type="number" read-only="false">
+    <value encoded="n"><![CDATA[30.0]]></value>
+    <description><![CDATA[Connection timeout]]></description>
+  </attrib>
+  <attrib name="operationTimeout" type="number" read-only="false">
+    <value encoded="n"><![CDATA[30.0]]></value>
+    <description><![CDATA[Operation timeout]]></description>
+  </attrib>
+  <workflow-item name="item0" out-name="item1" catch-name="item2" throw-bind-name="errorCode" type="task">
+    <display-name><![CDATA[Add a REST host]]></display-name>
+    <script encoded="false"><![CDATA[var currentdate = new Date(); 
+var datetime =  + currentdate.getDate() + "/"
+                + (currentdate.getMonth()+1)  + "/" 
+                + currentdate.getFullYear() + " @ "  
+                + currentdate.getHours() + ":"  
+                + currentdate.getMinutes() + ":" 
+                + currentdate.getSeconds() + "."
+                + currentdate.getMilliseconds();
+System.log(" *** Add Pure1 START: ");
+System.log(datetime);
+
+if (parallelRequestExecution) {
+   var host = RESTHostManager.createHostSupportingParallelRequests(name);
+} else {
+   var host = RESTHostManager.createHost(name);
+}
+
+host.url = url;
+host.connectionTimeout = connectionTimeout;
+host.operationTimeout = operationTimeout;
+host.hostVerification = hostVerification;
+host.proxyHost = proxyHost;
+host.proxyPort = proxyPort;
+host.setAutoUrlRedirect(autoUrlRedirection);
+
+var proxyAuthParams = [proxySessionMode , proxyAuthUserName, proxyAuthPassword];
+var proxyAuthenticationObject = RESTAuthenticationManager.createAuthentication(proxyAuthentication, proxyAuthParams);
+host.proxyAuthentication = proxyAuthenticationObject;
+
+restHost = RESTHostManager.addHost(host);
+System.log("Pure1 target added: " + restHost.url);]]></script>
+    <in-binding>
+      <bind name="authentication" type="string" export-name="authentication"></bind>
+      <bind name="connectionTimeout" type="number" export-name="connectionTimeout"></bind>
+      <bind name="name" type="string" export-name="name"></bind>
+      <bind name="operationTimeout" type="number" export-name="operationTimeout"></bind>
+      <bind name="url" type="string" export-name="url"></bind>
+      <bind name="proxyHost" type="string" export-name="proxyHost"></bind>
+      <bind name="proxyPort" type="number" export-name="proxyPort"></bind>
+      <bind name="hostVerification" type="boolean" export-name="hostVerification"></bind>
+      <bind name="proxyAuthentication" type="string" export-name="proxyAuthentication"></bind>
+      <bind name="proxyAuthUserName" type="string" export-name="proxyAuthUserName"></bind>
+      <bind name="proxyAuthPassword" type="SecureString" export-name="proxyAuthPassword"></bind>
+      <bind name="proxySessionMode" type="string" export-name="proxySessionMode"></bind>
+      <bind name="autoUrlRedirection" type="boolean" export-name="autoUrlRedirection"></bind>
+      <bind name="parallelRequestExecution" type="boolean" export-name="parallelRequestExecution"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="errorCode" type="string" export-name="errorCode"></bind>
+    </out-binding>
+    <position y="146.3181818181818" x="544.5"></position>
+  </workflow-item>
+  <workflow-item name="item1" type="end" end-mode="0">
+    <position y="199.95454545454544" x="584.5"></position>
+  </workflow-item>
+  <workflow-item name="item2" throw-bind-name="errorCode" type="end" end-mode="1">
+    <position y="136.3181818181818" x="744.5"></position>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item8" type="custom-condition" alt-out-name="item0">
+    <display-name><![CDATA[Custom decision]]></display-name>
+    <script encoded="false"><![CDATA[var currentdate = new Date(); 
+
+var datetime =  + currentdate.getDate() + "/"
+                + (currentdate.getMonth()+1)  + "/" 
+                + currentdate.getFullYear() + " @ "  
+                + currentdate.getHours() + ":"  
+                + currentdate.getMinutes() + ":" 
+                + currentdate.getSeconds() + "."
+                + currentdate.getMilliseconds();
+return (/^https:/).test(url);]]></script>
+    <in-binding>
+      <bind name="url" type="string" export-name="url"></bind>
+    </in-binding>
+    <description><![CDATA[Determines whether the protocol is HTTPS.]]></description>
+    <position y="136.3181818181818" x="284.5"></position>
+  </workflow-item>
+  <workflow-item name="item3" throw-bind-name="errorCode" type="end" end-mode="1">
+    <position y="54.5" x="524.5"></position>
+  </workflow-item>
+  <workflow-item name="item6" out-name="item7" type="condition" alt-out-name="item5" comparator="0">
+    <display-name><![CDATA[Decision]]></display-name>
+    <script encoded="false"><![CDATA[//Generated by the system, cannot be edited
+return (useProxy == true) ;]]></script>
+    <in-binding>
+      <bind name="useProxy" type="boolean" export-name="useProxy"></bind>
+    </in-binding>
+    <condition name="useProxy" type="boolean" comparator="0" label="null">false</condition>
+    <position y="9.045454545454543" x="284.5"></position>
+  </workflow-item>
+  <workflow-item name="item7" out-name="item0" catch-name="item3" throw-bind-name="errorCode" type="link" linked-workflow-id="b006447c-c041-4d51-8726-9f30b9709284">
+    <display-name><![CDATA[Import a certificate from URL using proxy server]]></display-name>
+    <in-binding>
+      <bind name="url" type="string" export-name="host">
+        <description><![CDATA[URL or just host:port for non-HTTPS SSL services:]]></description>
+      </bind>
+      <bind name="ignoreWarnings" type="boolean" export-name="ignoreWarnings">
+        <description><![CDATA[If set to true, the certificate is accepted silently and the certificate is added to the trusted store]]></description>
+      </bind>
+      <bind name="proxyHost" type="string" export-name="proxyHost">
+        <description><![CDATA[Proxy host]]></description>
+      </bind>
+      <bind name="proxyPort" type="number" export-name="proxyPort">
+        <description><![CDATA[Proxy port]]></description>
+      </bind>
+    </in-binding>
+    <out-binding></out-binding>
+    <description><![CDATA[Imports an SSL certificate into the server trust store.]]></description>
+    <position y="64.5" x="384.5"></position>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item0" catch-name="item3" throw-bind-name="errorCode" type="link" linked-workflow-id="c5a874a2-e8e7-480d-bdde-d1a80b8a3011">
+    <display-name><![CDATA[Import a certificate from URL]]></display-name>
+    <in-binding>
+      <bind name="url" type="string" export-name="host">
+        <description><![CDATA[URL or just host:port for non-HTTPS SSL services:]]></description>
+      </bind>
+      <bind name="ignoreWarnings" type="boolean" export-name="ignoreWarnings">
+        <description><![CDATA[If set to true, the certificate is accepted silently and the certificate is added to the trusted store]]></description>
+      </bind>
+    </in-binding>
+    <out-binding></out-binding>
+    <description><![CDATA[Imports an SSL certificate into the server trust store.]]></description>
+    <position y="19.045454545454543" x="544.5"></position>
+  </workflow-item>
+  <workflow-item name="item8" out-name="item6" type="task">
+    <display-name><![CDATA[Get host from base url]]></display-name>
+    <script encoded="false"><![CDATA[host = url.substring(8, url.length);
+var end = host.indexOf("/");
+if (end != -1) {
+	host = host.substring(0, end);
+}
+System.log(url);]]></script>
+    <in-binding>
+      <bind name="url" type="string" export-name="url"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="host" type="string" export-name="host"></bind>
+    </out-binding>
+    <position y="82.68181818181817" x="285.0"></position>
+  </workflow-item>
+  <presentation>
+    <p-step>
+      <title><![CDATA[Pure1]]></title>
+      <desc><![CDATA[Adding Pure1 REST target.
+]]></desc>
+      <p-param name="useProxy">
+        <desc><![CDATA[Use Proxy?]]></desc>
+        <p-qual kind="static" name="defaultValue" type="boolean"><![CDATA[__NULL__]]></p-qual>
+      </p-param>
+    </p-step>
+    <p-step>
+      <title><![CDATA[Proxy Settings]]></title>
+      <desc><![CDATA[Enter Proxy information if necessary.]]></desc>
+      <p-group>
+        <title><![CDATA[Proxy Settings]]></title>
+        <p-param name="proxyHost">
+          <desc><![CDATA[Proxy address]]></desc>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+          <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#useProxy]]></p-qual>
+          <p-qual kind="ognl" name="dataBinding" type="string"><![CDATA[(#useProxy && #host != null) ? #host.proxyHost : ""]]></p-qual>
+        </p-param>
+        <p-param name="proxyPort">
+          <desc><![CDATA[Proxy port]]></desc>
+          <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+          <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#useProxy]]></p-qual>
+          <p-qual kind="ognl" name="dataBinding" type="number"><![CDATA[(#useProxy && #host != null) ? #host.proxyPort : ""]]></p-qual>
+        </p-param>
+        <p-param name="proxyAuthentication">
+          <desc><![CDATA[Proxy AuthenticationType]]></desc>
+          <p-qual kind="ognl" name="mandatory" type="boolean"><![CDATA[#useProxy]]></p-qual>
+          <p-qual kind="static" name="genericEnumeration" type="Array/string"><![CDATA[#{#string#NONE#;#string#Basic#}#]]></p-qual>
+          <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#useProxy]]></p-qual>
+        </p-param>
+      </p-group>
+      <p-group>
+        <title><![CDATA[Proxy Credentials]]></title>
+        <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#useProxy && #proxyAuthentication != "NONE" && #proxyAuthentication != "OAuth 1.0" && #proxyAuthentication != "OAuth 2.0"]]></p-qual>
+        <p-param name="proxySessionMode">
+          <desc><![CDATA[Proxy Session mode]]></desc>
+          <p-qual kind="static" name="genericEnumeration" type="Array/string"><![CDATA[#{#string#Shared Session#;#string#Per User Session#}#]]></p-qual>
+          <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#useProxy && #proxyAuthentication != "NONE" && #proxyAuthentication != "OAuth 1.0" && #proxyAuthentication != "OAuth 2.0"]]></p-qual>
+        </p-param>
+        <p-param name="proxyAuthUserName">
+          <desc><![CDATA[Proxy user name]]></desc>
+          <p-qual kind="ognl" name="mandatory" type="boolean"><![CDATA[#useProxy && (#proxySessionMode == "Shared Session")]]></p-qual>
+          <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#useProxy && (#proxySessionMode == "Shared Session")]]></p-qual>
+        </p-param>
+        <p-param name="proxyAuthPassword">
+          <desc><![CDATA[Proxy password]]></desc>
+          <p-qual kind="ognl" name="mandatory" type="boolean"><![CDATA[#useProxy && (#proxySessionMode == "Shared Session")]]></p-qual>
+          <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#useProxy && (#proxySessionMode == "Shared Session")]]></p-qual>
+        </p-param>
+      </p-group>
+    </p-step>
+  </presentation>
+</workflow>

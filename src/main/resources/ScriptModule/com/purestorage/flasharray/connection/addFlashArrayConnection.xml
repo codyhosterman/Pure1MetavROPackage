@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="addFlashArrayConnection" result-type="PS:FlashArrayConnection" api-version="6.0.0" id="c9ca8214-05df-44bd-9066-57e0e38064b1" version="2.2.0" allowed-operations="vef">
+  <description><![CDATA[Add a FlashArray Connection to the plug-in's configuration file.]]></description>
+  <param n="name" t="string"><![CDATA[Name of this connection (e.g. Pure-01)]]></param>
+  <param n="baseUrl" t="string"><![CDATA[FlashArray Base URL for REST API (e.g. https://pure-001.example.com/api/1.6)]]></param>
+  <param n="username" t="string"><![CDATA[FlashArray User Name]]></param>
+  <param n="password" t="SecureString"><![CDATA[FlashArray Password]]></param>
+  <script encoded="false"><![CDATA[
+if(!name || !baseUrl) throw "Name or Url parameter shoud not be empty.";
+
+
+var item = new PSFlashArrayConnection(name,baseUrl,username,password);
+
+var result = PSFlashArrayConnectionManager.addFlashArrayConnection(item);
+
+System.debug("FlashArray connection added: " + result);
+System.log("FlashArray connection \""+ name + "\" added successfully!");
+return result;
+]]></script>
+</dunes-script-module>

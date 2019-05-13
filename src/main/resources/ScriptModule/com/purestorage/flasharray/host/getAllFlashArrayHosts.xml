@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="getAllFlashArrayHosts" result-type="Array/PS:Host" api-version="6.0.0" id="f855fad8-90eb-4f39-8089-ea927575fa30" version="2.1.0" allowed-operations="vef">
+  <description><![CDATA[Get list of all FlashArray hosts.]]></description>
+  <param n="flashArrayConnection" t="PS:FlashArrayConnection"><![CDATA[FlashArray Connection]]></param>
+  <script encoded="false"><![CDATA[if(!flashArrayConnection) {
+	var errorMessage = "FlashArray Connection object should not be empty!";
+	System.error(errorMessage);
+	throw errorMessage;
+}
+
+System.debug("Input Parameter: " + "FlashArray Connection: " + flashArrayConnection);
+
+var restSession = PSSessionManager.getSession(flashArrayConnection);
+var hostObjectList = PSHostManager.getHosts(restSession);
+
+if(hostObjectList){
+	System.log("Total FlashArray host found: " + hostObjectList.length);
+}
+System.debug("Retured list of FlashArray Host object: " + hostObjectList);
+
+return hostObjectList;]]></script>
+</dunes-script-module>
